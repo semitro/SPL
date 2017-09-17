@@ -1,6 +1,7 @@
 
-global stridng_length
+global string_length
 global print_string
+global print_string_err
 global print_newline
 global print_char
 global print_int
@@ -35,8 +36,8 @@ string_length:
     jmp ._getChars
 ._ret:
     ret
-; Макрсон likely-unlikely unix
-;Args: rdi - pointer of null-terminated string 
+
+; Args: rdi - pointer of null-terminated string 
 print_string:
     mov rsi, rdi ; buffer pointer
     call string_length
@@ -45,7 +46,14 @@ print_string:
     mov rdi, 1
     syscall
     ret
-
+print_string_err:
+    mov rsi, rdi
+    call string_length
+    mov rdx, rax
+    mov rax, 1
+    mov rdi, 2
+    syscall
+    ret
 
 section .data
 ;ch_b1: db '1234567890987654321hehehey ', 0

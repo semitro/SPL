@@ -14,9 +14,15 @@ dict.o: lib.o
 
 main.o: main.asm
 	$(CC) $(CFLAGS) main.asm
-main.asm: colon.inc
-clean:
-	rm dict.o main.o
 
+main.asm: colon.inc
+
+colon.inc: words.inc
+
+clean:
+	rm dict.o main.o main
+test:	
+	make macroCheck
+	./main
 macroCheck: main.asm
-	nasm -E main.asm
+	nasm -E words.inc

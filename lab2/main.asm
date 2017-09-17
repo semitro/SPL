@@ -1,5 +1,4 @@
-%include "colon.inc"
-
+%include "words.inc"
 global _start
 
 extern print_char
@@ -9,35 +8,47 @@ extern find_word
 extern print_string
 extern read_word
 extern print_uint
+extern print_string_err
+extern string_length
 
+section .bss
+wantedWord:	
+	resb 255
 section .data
-	colon 'one', one
-	db 'sfsf'
-	colon 'two', two
-	db 'chares'
-	db 'garbageddggdg'
-	db 'mooooore', 0,0
-	colon 'three-0.2', three
-	db 'date'
-
-wantedWord:
-	db 'three-0.2', 0
+notFound:
+	db 'key not found', 0
+section .text
 _start:
 .test1:
+	; read the key to find
 	mov rdi, wantedWord
 	mov rsi, 255
 	call read_word
 	
-	mov rdi, wantedWord
+	mov rdi, wantedWord 
+	mov rsi, last_node
+	call find_word
+	
+	test rax, rax
+	jz .notFound 
+	mov r15, rax
+	
+	lea rdi, [rax + 8]
+	call string_length
+
+
+	
+	add rax, r15
+	mov rdi, rax
+	lea rdi, [rdi + 9]
 	call print_string
 	call print_newline
-
-	mov rdi, wantedWord 
-	mov rsi, three
-	call find_word
-
-	mov rdi, rax
-	call print_uint
-	;call print_string
+	mov rdi, 0
+	call exit
+.notFound:
+	
+	mov rdi, notFound
+	call print_string_err
 	call print_newline
+	mov rdi, 0
 	call exit
