@@ -46,20 +46,15 @@ int main(int argc, char **argv){
     
     // Elf-section Header is located in the RAM witch the offset
     // shoff - section offset from file
-    
-    Elf64_Shdr* elf_section = elf_header + elf_header->e_shoff;
-    int section_size = elf_header->e_shentsize;
-    printf("We're in : %x\n", section_size);
+    // Почему char*? потому что стандарт гарантирует, char = 8 бит
+    Elf64_Shdr* elf_section = (char*)elf_header + elf_header->e_shoff;
     int sections_num = elf_header->e_shnum;
     for(int i = 0; i < sections_num;i++){
         if(elf_section->sh_type == SHT_SYMTAB )
             puts("There is a symtab!\n");
         else
             printf("The section type: %d\n" + elf_section->sh_type);
-        printf("Addr: %x\n", elf_section);            
-        elf_section  += section_size/8;
-        printf("Addr: %x\n", elf_section);
-        
+        elf_section++;        
     }
     
     // Elf64_Sym* elf_sym;
