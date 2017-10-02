@@ -43,13 +43,28 @@ int main(int argc, char **argv){
     printf("The magic number: 0x%x %c %c %c\n", elf_header->e_ident[0],
            elf_header->e_ident[1], elf_header->e_ident[2], elf_header->e_ident[3]);
     
+    
     // Elf-section Header is located in the RAM witch the offset
-    Elf64_Shdr* elf_section_header = elf_header + elf_header->e_shoff;
+    // shoff - section offset from file
     
+    Elf64_Shdr* elf_section = elf_header + elf_header->e_shoff;
+    int section_size = elf_header->e_shentsize;
+    printf("We're in : %x\n", section_size);
+    int sections_num = elf_header->e_shnum;
+    for(int i = 0; i < sections_num;i++){
+        if(elf_section->sh_type == SHT_SYMTAB )
+            puts("There is a symtab!\n");
+        else
+            printf("The section type: %d\n" + elf_section->sh_type);
+        printf("Addr: %x\n", elf_section);            
+        elf_section  += section_size/8;
+        printf("Addr: %x\n", elf_section);
+        
+    }
     
-    Elf64_Sym* elf_sym;
-    elf_sym->st-name;
-    elf_sym->st_info == STT_FUNC;
+    // Elf64_Sym* elf_sym;
+    // elf_sym->st-name;
+    // elf_sym->st_info == STT_FUNC;
 
     return 0;
 }
