@@ -26,15 +26,28 @@ void* load_into_memory(char* file_name){
         return NULL;
 }
 
+// Находим все функции из таблицы символов, нам нужно
 void handle_sym_tab(Elf64_Sym* sym_ptr, size_t count){
     for(int i=0; i<count; i++){
-        printf("SymInfo %d: %d\n",i,ELF64_ST_TYPE(i));
         if(ELF64_ST_TYPE(sym_ptr->st_info) == STT_FUNC)
             puts("Ура!!! Мы нашли функцию!\n");
         sym_ptr++;
     }
 }
 
+// Перебирает все секции и вызывает обработчик для символьных
+void handle_sections(const Elf64_Ehdr* elf_header){
+    // Elf-section Header is located in the RAM witch the offset
+    // shoff - section offset from file
+    // Почему char*? потому что стандарт гарантирует, char = 8 бит
+    Elf64_Shdr* elf_section = (char*)elf_header + elf_header->e_shoff;
+    size_t sections_num = elf_header->e_shnum;
+    for(unsigned int i = 0; i < sections_num;i++){
+        if(elf_section->sh_type == SHT_SYMTAB )
+            handle_sym_tab(elf_section->sh_offset + (char*)elf_header, elf_section->sh_size / elf_section->sh_entsize);
+        elf_section++;        
+    }
+}
 int main(int argc, char **argv){
     if(argc != 2){
         puts("Enter the object-file to input.");
@@ -50,25 +63,7 @@ int main(int argc, char **argv){
     printf("The magic number: 0x%x %c %c %c\n", elf_header->e_ident[0],
            elf_header->e_ident[1], elf_header->e_ident[2], elf_header->e_ident[3]);
     
+    handle_sections(elf_header);
     
-    // Elf-section Header is located in the RAM witch the offset
-    // shoff - section offset from file
-    // Почему char*? потому что стандарт гарантирует, char = 8 бит
-    Elf64_Shdr* elf_section = (char*)elf_header + elf_header->e_shoff;
-    int sections_num = elf_header->e_shnum;
-    for(int i = 0; i < sections_num;i++){
-        if(elf_section->sh_type == SHT_SYMTAB ){
-            puts("There is a symtab!\n");
-            handle_sym_tab(elf_section->sh_offset + (char*)elf_header, elf_section->sh_size / elf_section->sh_entsize);         
-        }
-        else
-            printf("The section type: %d\n" + elf_section->sh_type);
-        elf_section++;        
-    }
-    
-    // Elf64_Sym* elf_sym;
-    // elf_sym->st-name;
-    // elf_sym->st_info == STT_FUNC;
-
     return 0;
 }
