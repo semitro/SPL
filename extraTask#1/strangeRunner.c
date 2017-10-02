@@ -26,6 +26,14 @@ void* load_into_memory(char* file_name){
         return NULL;
 }
 
+void handle_sym_tab(Elf64_Sym* sym_ptr, size_t count){
+    for(int i=0; i<count; i++){
+        printf("SymInfo %d: %d\n",i,ELF64_ST_TYPE(i));
+        if(ELF64_ST_TYPE(sym_ptr->st_info) == STT_FUNC)
+            puts("Ура!!! Мы нашли функцию!\n");
+        sym_ptr++;
+    }
+}
 
 int main(int argc, char **argv){
     if(argc != 2){
@@ -33,7 +41,6 @@ int main(int argc, char **argv){
         return 0;        
     }
 
-    
     // Elf-header
     Elf64_Ehdr* elf_header = load_into_memory(argv[1]);
     if( !(elf_header->e_type == ET_REL || elf_header->e_type == ET_EXEC) ){
@@ -50,8 +57,10 @@ int main(int argc, char **argv){
     Elf64_Shdr* elf_section = (char*)elf_header + elf_header->e_shoff;
     int sections_num = elf_header->e_shnum;
     for(int i = 0; i < sections_num;i++){
-        if(elf_section->sh_type == SHT_SYMTAB )
+        if(elf_section->sh_type == SHT_SYMTAB ){
             puts("There is a symtab!\n");
+            handle_sym_tab(elf_section->sh_offset + (char*)elf_header, elf_section->sh_size / elf_section->sh_entsize);         
+        }
         else
             printf("The section type: %d\n" + elf_section->sh_type);
         elf_section++;        
