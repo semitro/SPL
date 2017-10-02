@@ -26,11 +26,18 @@ void* load_into_memory(char* file_name){
         return NULL;
 }
 
+void function_to_invoke_prototype();
 // Находим все функции из таблицы символов, нам нужно
-void handle_sym_tab(Elf64_Sym* sym_ptr, size_t count){
+void handle_sym_tab(Elf64_Sym* sym_ptr, const size_t count, const char* elf_file_start_addr){
     for(int i=0; i<count; i++){
-        if(ELF64_ST_TYPE(sym_ptr->st_info) == STT_FUNC)
+        if(ELF64_ST_TYPE(sym_ptr->st_info) == STT_FUNC){
             puts("Ура!!! Мы нашли функцию!\n");
+            printf("The value: %d\n", sym_ptr->st_shndx);
+            
+            // void(*function)() = elf_file_start_addr + ((Elf64_Shdr*)sym_ptr->st_shndx)->sh_offset;
+        
+            //function();
+        }
         sym_ptr++;
     }
 }
@@ -40,11 +47,16 @@ void handle_sections(const Elf64_Ehdr* elf_header){
     // Elf-section Header is located in the RAM witch the offset
     // shoff - section offset from file
     // Почему char*? потому что стандарт гарантирует, char = 8 бит
-    Elf64_Shdr* elf_section = (char*)elf_header + elf_header->e_shoff;
+    // Явное преобразование добавлено, чтобы избежать предупреждения компилятора. Это правильно?
+    Elf64_Shdr* elf_section = (Elf64_Shdr*)((char*)elf_header + elf_header->e_shoff);
     size_t sections_num = elf_header->e_shnum;
     for(unsigned int i = 0; i < sections_num;i++){
         if(elf_section->sh_type == SHT_SYMTAB )
-            handle_sym_tab(elf_section->sh_offset + (char*)elf_header, elf_section->sh_size / elf_section->sh_entsize);
+            handle_sym_tab(
+                            (Elf64_Sym*) (elf_section->sh_offset + (char*)elf_header), 
+                            elf_section->sh_size / elf_section->sh_entsize,
+                            (char*)elf_header
+                          );
         elf_section++;        
     }
 }
