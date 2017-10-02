@@ -24,11 +24,9 @@ _start:
 	mov rdi, wantedWord
 	mov rsi, 255
 	call read_word
-	
 	mov rdi, wantedWord 
 	mov rsi, last_node
 	call find_word
-	
 	test rax, rax
 	jz .notFound 
 	mov r15, rax

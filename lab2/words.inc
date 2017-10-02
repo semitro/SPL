@@ -1,6 +1,7 @@
 %include "colon.inc"
 ; The dictionary's filling
 section .data
+	
         colon 'one', one
         db 'Some dates', 0
 
@@ -12,6 +13,6 @@ section .data
 
         colon 'three-0.2', three
         db 'date', 0
-
+	; root node
 	colon 'last', last_node
 	db 'Some bytes', 0
