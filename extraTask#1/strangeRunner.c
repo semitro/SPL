@@ -34,10 +34,22 @@ int main(int argc, char **argv){
     }
 
     
-    
+    // Elf-header
     Elf64_Ehdr* elf_header = load_into_memory(argv[1]);
-    printf("The magic number: %d ", elf_header->e_ident[0]);
-    (void)argv;
+    if( !(elf_header->e_type == ET_REL || elf_header->e_type == ET_EXEC) ){
+        puts("A file you want to run is not the elf-format\n(or the elf but not an relocatable or executable)");
+        return 0;
+    }
+    printf("The magic number: 0x%x %c %c %c\n", elf_header->e_ident[0],
+           elf_header->e_ident[1], elf_header->e_ident[2], elf_header->e_ident[3]);
+    
+    // Elf-section Header is located in the RAM witch the offset
+    Elf64_Shdr* elf_section_header = elf_header + elf_header->e_shoff;
+    
+    
+    Elf64_Sym* elf_sym;
+    elf_sym->st-name;
+    elf_sym->st_info == STT_FUNC;
 
     return 0;
 }
