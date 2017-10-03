@@ -4,12 +4,12 @@
 #include <fcntl.h> // The open sys call is here
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 // Load the file's content into memory as it
 // Returns a pointer to memory location where it loaded
 void* load_into_memory(char* file_name){
     int fd = open(file_name, O_RDONLY);
-
     if(fd < 0)
         goto err;
   
@@ -20,39 +20,38 @@ void* load_into_memory(char* file_name){
     extern void *mmap (void *__addr, size_t __len, int __prot,
 		   int __flags, int __fd, __off_t __offset) __THROW;
     */
-    return mmap(0, stat_buffer.st_size, PROT_EXEC | PROT_READ, MAP_PRIVATE, fd, 0);
+    void* addr = mmap(0, stat_buffer.st_size, PROT_EXEC | PROT_READ, MAP_PRIVATE, fd, 0);
+    close(fd);
+    return addr;
 
     err:
         perror("fsafa");
         return NULL;
 }
 
-Elf64_Shdr* get_section_by_index(const Elf64_Ehdr* elf_header, unsigned int index){
+// Таблица символов указывает лишь на индекс секции, поэтому возникает необходимость в данной функции
+Elf64_Shdr* get_section_by_index(const Elf64_Ehdr* elf_header, unsigned int index)
+{
     Elf64_Shdr* section_ptr = (Elf64_Shdr*)((char*)elf_header + elf_header->e_shoff);
     while(index--) section_ptr++;
     return section_ptr;
 }
-            char* string = "sfasfsaf";
 
 // Находим все функции из таблицы символов, нам нужно
 void handle_sym_tab(Elf64_Sym* sym_ptr, const size_t count, const Elf64_Ehdr* elf_header){
     for(int i=0; i<count; i++){
         if(ELF64_ST_TYPE(sym_ptr->st_info) == STT_FUNC){
-            puts("Ура!!! Мы нашли функцию!\n");
-//            printf("The value: %d\n", sym_ptr->st_shndx);
-//            printf("start: %x\n", elf_header);
+            puts("\nУра!!! Мы нашли функцию!");
 
             Elf64_Shdr* section_to_go =  get_section_by_index(elf_header, sym_ptr->st_shndx);
-//            void(*function)() =
-//                section_to_go->sh_offset + (char*)section_to_go->sh_size
-//                 + (char*)sym_ptr->st_value + (char*)elf_header;
-            
-            int(*function)(char* ) = (char*)elf_header + section_to_go->sh_offset;
-            printf("The function: %x\n", function);
+
+            int(*function)(char* ) = (void*)((char*)elf_header + section_to_go->sh_offset);
+            printf("The function's addr: %p\n", function);
+            char* string = "sfasfsaf";
             puts(string);
             printf("Function gives: %d", function(string));
             puts(string);
-            puts("We are alive!!!");
+            puts("We are alive!\n");
         }
         sym_ptr++;
     }
@@ -64,7 +63,6 @@ void handle_sections(const Elf64_Ehdr* elf_header){
     // Elf-section Header is located in the RAM witch the offset
     // shoff - section offset from file
     // Почему char*? потому что стандарт гарантирует, char = 8 бит
-    // Явное преобразование добавлено, чтобы избежать предупреждения компилятора. Это правильно?
     Elf64_Shdr* elf_section = get_section_by_index(elf_header,0);
     size_t sections_num = elf_header->e_shnum;
     for(unsigned int i = 0; i < sections_num;i++){
@@ -90,6 +88,7 @@ int main(int argc, char **argv){
         puts("A file you want to run is not the elf-format\n(or the elf but not an relocatable or executable)");
         return 0;
     }
+
     printf("The magic number: 0x%x %c %c %c\n", elf_header->e_ident[0],
            elf_header->e_ident[1], elf_header->e_ident[2], elf_header->e_ident[3]);
     

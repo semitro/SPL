@@ -1,5 +1,4 @@
 
-
 int function(char* str){
 /*	__asm__(
 		"xor %rdi, %rdi;\n\t"
@@ -9,13 +8,13 @@ int function(char* str){
 		:"%rdi"
 		);
 */
-	int x = str[1];
-//	str[2] = 42;
+	
+	//char* cheat = *str;
 	return 42;
 }
 //		"movb 42, (%%rdi);\n\t"
 
-void function2(){
-
+char function2(){
+	return 42;
 }
 
