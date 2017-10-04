@@ -2,9 +2,9 @@ CC=gcc
 CFLAGS= -std=c99 -Wall -ggdb
 
 
-src = strangeRunner.c
+src = strangeRunner.c main.c
 objects = $(src:.c=.o)
-main=strangeRunner
+main=main
 
 all: $(main)
 
