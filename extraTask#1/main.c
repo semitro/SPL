@@ -1,8 +1,9 @@
 #include "StrangeRunner.h"
+#include "FileInteraction.h"
 
 int main(int argc, char **argv){
-    if(argc != 2){
-        puts("Enter the object-file to input.");
+    if(argc != 3){
+        puts("Usage: elf_file.o text_file.txt");
         return 0;
     }
 
@@ -16,7 +17,6 @@ int main(int argc, char **argv){
     }
 
     int(*function)(char*) = get_function(elf);
-    int answer = function("privet epta");
-    printf("The function said: %d\n", answer);
+    apply_for_each_stroke_show_int(function,argv[2]);
     return 0;
 }

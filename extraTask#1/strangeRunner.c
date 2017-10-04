@@ -54,22 +54,15 @@ static Elf64_Shdr* get_section_by_index(const Elf64_Ehdr* elf_header, unsigned i
 
 // Находим все функции из таблицы символов
 static void* handle_sym_tab(Elf64_Sym* sym_ptr, const size_t count, const Elf64_Ehdr* elf_header){
+
     for(int i=0; i<count; i++){
+
         if(ELF64_ST_TYPE(sym_ptr->st_info) == STT_FUNC){
-            puts("\nУра!!! Мы нашли функцию!");
-
             Elf64_Shdr* section_to_go =  get_section_by_index(elf_header, sym_ptr->st_shndx);
-
             int(*function)(char* ) = (void*)((char*)elf_header + section_to_go->sh_offset);
             return function;
-//            printf("The function's addr: %p\n", function);
-//            char* string = "sfasfsaf";
-//            puts(string);
-//            int returnValue = function(string);
-//            printf("Function gives: %d", returnValue);
-//            puts(string);
-//            puts("We are alive!\n");
         }
+
         sym_ptr++;
     }
     return NULL;

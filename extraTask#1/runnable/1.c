@@ -10,9 +10,18 @@ int function(char* str){
 		:"%rdi"
 		);
 */
-	
 	//char* cheat = *str;
-	return 42;
+	
+	int i = 0;
+	int ans = 0;
+	
+	while( str[i] != '\0'){
+		 if('*' == str[i]) ans++;
+		i++;
+	}
+
+	
+	return  ans;
 }
 //		"movb 42, (%%rdi);\n\t"
 

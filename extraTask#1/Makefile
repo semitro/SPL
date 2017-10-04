@@ -2,7 +2,7 @@ CC=gcc
 CFLAGS= -std=c99 -Wall -ggdb
 
 
-src = strangeRunner.c main.c
+src = strangeRunner.c main.c FileInteraction.c
 objects = $(src:.c=.o)
 main=main
 
