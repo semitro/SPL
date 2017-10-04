@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+
+
 // Load the file's content into memory as it
 // Returns a pointer to memory location where it loaded
 void* load_into_memory(char* file_name){
@@ -49,7 +51,8 @@ void handle_sym_tab(Elf64_Sym* sym_ptr, const size_t count, const Elf64_Ehdr* el
             printf("The function's addr: %p\n", function);
             char* string = "sfasfsaf";
             puts(string);
-            printf("Function gives: %d", function(string));
+            int returnValue = function(string);
+            printf("Function gives: %d", returnValue);
             puts(string);
             puts("We are alive!\n");
         }

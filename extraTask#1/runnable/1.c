@@ -1,5 +1,7 @@
+#include <stdio.h>
 
 int function(char* str){
+	puts("hello from the otherside!");
 /*	__asm__(
 		"xor %rdi, %rdi;\n\t"
 		"movb %0, %rdi;\n\t"
