@@ -24,11 +24,16 @@ list_node* list_node_at(size_t index, const list_node* const list){
 
 list_content list_get (size_t index, const list_node* const list){
     list_node* current_node = (list_node*)list;
+
+    if(!current_node)
+        return 0;
+
     while(index--) {
+        current_node = current_node->next;
+
         if(!current_node)
             return 0; // As the task requires, return 0 if index > number of elements
 
-        current_node = current_node->next;
 
     }
     return current_node->value;
@@ -78,4 +83,12 @@ void list_free( list_node**   list){
     (*list) = NULL;
 }
 
-
+long long list_sum(const list_node* const list){
+    long long sum = 0;
+    list_node* current_node = (list_node*)list;
+    while(current_node){
+        sum += current_node->value;
+        current_node = current_node->next;
+    }
+    return sum;
+}

@@ -1,4 +1,4 @@
-// Created by semitro on 05.10.17.
+// Creatded by semitro on 05.10.17.
 #ifndef LAB4_LIST_H
 #define LAB4_LIST_H
 
