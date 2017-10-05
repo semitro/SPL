@@ -44,11 +44,24 @@ size_t list_length(const list_node* const list) {
     return ans;
 }
 
-void list_add_front(list_content value, list_node** list){
+void list_add_front(const list_content value, const list_node** list){
     list_node* new_node = list_create(value);
     if(new_node){
         new_node->next = (list_node*)*(list);
         *list = new_node;
+    }
+}
+
+void list_add_back(const list_content value, const list_node** list){
+
+    list_node* current_node = (list_node*)*(list);
+    while(current_node->next){
+        current_node = current_node->next;
+    }
+
+    list_node* new_node = list_create(value);
+    if(new_node){
+       current_node->next = new_node;
     }
 }
 
