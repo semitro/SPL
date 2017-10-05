@@ -16,7 +16,7 @@ int function(char* str){
 	int ans = 0;
 	
 	while( str[i] != '\0'){
-		 if('*' == str[i]) ans++;
+		 if('!' == str[i]) ans++;
 		i++;
 	}
 
