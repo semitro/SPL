@@ -23,20 +23,11 @@ list_node* list_node_at(size_t index, const list_node* const list){
 }
 
 list_content list_get (size_t index, const list_node* const list){
-    list_node* current_node = (list_node*)list;
-
-    if(!current_node)
+    list_node* node = list_node_at(index,list);
+    if(node)
+        return node->value;
+    else
         return 0;
-
-    while(index--) {
-        current_node = current_node->next;
-
-        if(!current_node)
-            return 0; // As the task requires, return 0 if index > number of elements
-
-
-    }
-    return current_node->value;
 }
 
 size_t list_length(const list_node* const list) {
