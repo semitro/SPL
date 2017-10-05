@@ -1,15 +1,15 @@
-//
 // Created by semitro on 05.10.17.
-//
-
 #ifndef LAB4_LIST_H
 #define LAB4_LIST_H
+
+#include <stddef.h>
 
 typedef int list_content;
 typedef struct list_node{
     list_content value;
     struct list_node* next;
 }list_node;
+
 
 list_node*    list_create    (list_content value);
 list_node*    list_node_at   (const size_t index);
