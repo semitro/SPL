@@ -35,16 +35,16 @@ list_content list_get (size_t index, const list_node* const list){
 }
 
 size_t list_length(const list_node* const list) {
-    size_t ans = 1;
+    size_t ans = 0;
     list_node* current_node = (list_node*)list;
-    while(current_node->next){
+    while(current_node){
         ans++;
         current_node = current_node->next;
     }
     return ans;
 }
 
-void list_add_front(const list_content value, const list_node** list){
+void list_add_front(const list_content value, list_node** list){
     list_node* new_node = list_create(value);
     if(new_node){
         new_node->next = (list_node*)*(list);
@@ -52,7 +52,7 @@ void list_add_front(const list_content value, const list_node** list){
     }
 }
 
-void list_add_back(const list_content value, const list_node** list){
+void list_add_back(const list_content value, list_node** list){
 
     list_node* current_node = (list_node*)*(list);
     while(current_node->next){
@@ -64,4 +64,18 @@ void list_add_back(const list_content value, const list_node** list){
        current_node->next = new_node;
     }
 }
+
+void list_free( list_node**   list){
+
+    list_node* to_free = (list_node*)*list;
+    list_node* next;
+
+    while(to_free){
+        next = to_free->next;
+        free(to_free);
+        to_free = next;
+    }
+    (*list) = NULL;
+}
+
 
