@@ -41,8 +41,27 @@ list_content list_foldl (const list_node* const list,
                     list_content(*function)(list_content,list_content)){
     // Лучше ли использовать отдельную переменную аккумулятора или использовать то, что уже есть на стеке?
     // Функция принимает параметр, и поэтому не может изменить передаваемое значение. Так что явно приводим
+    // Just for fun
     return list ?
                     list->next ? list_foldl(list->next, function((list_content)accumulator, list->value),function )
                                :                        function((list_content)accumulator, list->value)
            : 0;
+}
+
+list_node* list_iterate(const list_content s,
+                        list_content(*function)(list_content), size_t length){
+
+    if(!function || !length)
+        return NULL;
+
+    list_content current_result = s;
+
+    list_node* new_list = list_create(function(current_result));
+
+    while (--length){
+        current_result = function(current_result);
+        list_add_back(current_result,&new_list);
+    }
+
+    return new_list;
 }
