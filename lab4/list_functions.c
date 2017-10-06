@@ -42,7 +42,7 @@ list_content list_foldl (const list_node* const list,
     // Лучше ли использовать отдельную переменную аккумулятора или использовать то, что уже есть на стеке?
     // Функция принимает параметр, и поэтому не может изменить передаваемое значение. Так что явно приводим
     return list ?
-                    list->next ? list_foldl(list, function((list_content)accumulator, list->value),function )
-                               :                  function((list_content)accumulator, list->value)
+                    list->next ? list_foldl(list->next, function((list_content)accumulator, list->value),function )
+                               :                        function((list_content)accumulator, list->value)
            : 0;
 }
