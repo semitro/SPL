@@ -1,5 +1,6 @@
 #include "list.h"
 #include "stdio.h"
+
 list_node* list_create (list_content value){
     list_node* node = malloc(sizeof(*node));
     if(node) {
@@ -81,5 +82,6 @@ long long list_sum(const list_node* const list){
         sum += current_node->value;
         current_node = current_node->next;
     }
-    return sum;
+    return sum; //list && list->next ? list->value + list_sum(list->next) : list->value;// by Yakov G. 2017
 }
+

@@ -26,3 +26,23 @@ list_node* list_map(const list_node* const list,list_content(*function)(list_con
 
     return first_node;
 }
+
+list_node* list_map_mut(list_node* const list, list_content(*function)(list_content)){
+    list_node* current_node = (list_node*)list;
+    while(current_node){
+        current_node->value = function(current_node->value);
+        current_node = current_node->next;
+    }
+    return list;
+}
+
+list_content list_foldl (const list_node* const list,
+                    const list_content accumulator,
+                    list_content(*function)(list_content,list_content)){
+    // Лучше ли использовать отдельную переменную аккумулятора или использовать то, что уже есть на стеке?
+    // Функция принимает параметр, и поэтому не может изменить передаваемое значение. Так что явно приводим
+    return list ?
+                    list->next ? list_foldl(list, function((list_content)accumulator, list->value),function )
+                               :                  function((list_content)accumulator, list->value)
+           : 0;
+}
