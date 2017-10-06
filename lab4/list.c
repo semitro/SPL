@@ -48,17 +48,17 @@ void list_add_front(const list_content value, list_node** list){
     }
 }
 
-void list_add_back(const list_content value, list_node** list){
+void list_add_back(const list_content value, list_node** const const list){
 
     list_node* current_node = (list_node*)*(list);
-    while(current_node->next){
+
+    while(current_node->next)
         current_node = current_node->next;
-    }
 
     list_node* new_node = list_create(value);
-    if(new_node){
+    if(new_node)
        current_node->next = new_node;
-    }
+
 }
 
 void list_free( list_node**   list){

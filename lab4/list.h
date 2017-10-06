@@ -18,7 +18,7 @@ list_content  list_get       (size_t index, const list_node* const list);
 size_t        list_length    (const list_node* const list);
 // Add the element. Change the pointer to the new beginning
 void          list_add_front (const list_content value, list_node** list);
-void          list_add_back  (const list_content value, list_node** list);
+void          list_add_back  (const list_content value, list_node** const const list);
 
 void          list_free      (list_node**   list);
 
