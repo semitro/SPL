@@ -88,22 +88,29 @@ void test_2(list_node* list){
     list_for_each(list,function_print);
 }
 
-void test_3_serialize(list_node* list, const char* const file_name){
+void test_3_serialize(list_node* list, const char* const text_file_name, const char* const bin_file_name){
     puts("\n*******");
     puts("A set of tests about the serializing");
-    printf("\n*******\nTesting following list with file '%s'\n",file_name);
+    printf("\n*******\nTesting following list with files '%s', '%s'\n",text_file_name, bin_file_name);
     print_list(list);
     puts("\n******");
-    if(list_save(list,file_name))
+    if(list_save(list,text_file_name))
         puts("Save's OK");
     else
         puts("!Save error!");
-    if(list_load(&list,file_name + ".txt"))
+    if(list_load(&list,text_file_name))
         puts("Load's OK");
     else
-        puts("Load error!");
-    if(list_save_binary(list,file_name + ".bin"))
+        puts("!Load error!");
+    if(list_save_binary(list,bin_file_name))
         puts("Save binary's OK");
     else
-        puts("!Save error!");
+        puts("!Save binary error!");
+    if(list_load_binary(&list,bin_file_name))
+        puts("Load binary's OK");
+    else
+        puts("!Load binary error!");
+    puts("The list:");
+    print_list(list);
+    puts("\nThanks.");
 }

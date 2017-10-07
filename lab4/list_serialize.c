@@ -64,8 +64,25 @@ bool list_load(list_node** lst, const char* const filename){
     *lst = read_list_from_stream(file,MAX_INPUT_BUFFER_SIZE);
 
     fclose(file);
-    return true;
+    return lst;
 }
 
+bool list_load_binary (list_node** lst, const char* const filename){
+    FILE* file = fopen(filename,"rb");
+    if(!file)
+        return false;
 
+    list_content n = NULL;
+    list_free(lst);
+    while(fread(&n, sizeof n,1,file))
+        if(*lst)
+            list_add_back(n,lst);
+        else
+            *lst = list_create(n);
+
+    fclose(file);
+    // If fread has not been worked as least once, list = NULL and it's an error
+    // Otherwise, everything's ok, so we can just return list
+    return *lst;
+}
 

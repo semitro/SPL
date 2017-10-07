@@ -16,7 +16,7 @@ int main() {
 
     test_1(input_list);
     test_2(input_list);
-    test_3_serialize(input_list,"saved_list");
+    test_3_serialize(input_list,"saved_list.txt","saved_list.bin");
 /*   printf("%d\n", list_create(5)->value);
 //    printf("%d\n",(int)  list_get(1000000000000000000,list_create(5)));
 //    printf("%p\n",(void*)list);
