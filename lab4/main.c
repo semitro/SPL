@@ -5,7 +5,7 @@
 
 int main() {
     printf("%s","SPL.Lab #4.\nGive me some integers: ");
-    list_node* input_list = read_list_from_std(512);
+    list_node* input_list = read_list_from_std(MAX_INPUT_BUFFER_SIZE);
 
     size_t len = list_length(input_list);
     printf("List's length = %d", (int)len);
@@ -15,6 +15,8 @@ int main() {
     }
 
     test_1(input_list);
+    test_2(input_list);
+    test_3_serialize(input_list,"saved_list.txt");
 /*   printf("%d\n", list_create(5)->value);
 //    printf("%d\n",(int)  list_get(1000000000000000000,list_create(5)));
 //    printf("%p\n",(void*)list);
