@@ -56,7 +56,7 @@ list_node* list_iterate(const list_content s,
 
     list_content current_result = s;
 
-    list_node* new_list = list_create(function(current_result));
+    list_node* new_list = list_create(current_result);
 
     while (--length){
         current_result = function(current_result);
