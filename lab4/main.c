@@ -17,7 +17,7 @@ int main() {
     test_1(input_list);
     test_2(input_list);
     test_3_serialize(input_list,"saved_list.txt","saved_list.bin");
-/*   printf("%d\n", list_create(5)->value);
+    /*   printf("%d\n", list_create(5)->value);
 //    printf("%d\n",(int)  list_get(1000000000000000000,list_create(5)));
 //    printf("%p\n",(void*)list);
 
@@ -30,8 +30,7 @@ int main() {
     list_add_back(12,&list);
     list_add_back(-12,&list);
     */
-
-  /*  printf("Node nx: %d\n",list_get(0,list));
+    /*  printf("Node nx: %d\n",list_get(0,list));
     printf("len: %d\n", (int)list_length(list));
     printf("sum: %d\n", (int)list_sum(list));
     puts("Using for_each to write out the list:");

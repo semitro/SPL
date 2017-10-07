@@ -1,7 +1,7 @@
 #include "list.h"
 #include "stdio.h"
 
-list_node* list_create (list_content value){
+list_node* list_create (const list_content value){
     list_node* node = malloc(sizeof(*node));
     if(node) {
         node->value = value;
@@ -16,9 +16,7 @@ list_node* list_node_at(size_t index, const list_node* const list){
     while(index--) {
         if(!current_node)
             return NULL;
-
         current_node = current_node->next;
-
     }
     return current_node;
 }
