@@ -98,8 +98,12 @@ void test_3_serialize(list_node* list, const char* const file_name){
         puts("Save's OK");
     else
         puts("!Save error!");
-    if(list_load(&list,file_name))
+    if(list_load(&list,file_name + ".txt"))
         puts("Load's OK");
     else
         puts("Load error!");
+    if(list_save_binary(list,file_name + ".bin"))
+        puts("Save binary's OK");
+    else
+        puts("!Save error!");
 }

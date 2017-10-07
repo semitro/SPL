@@ -2,26 +2,40 @@
 // Created by semitro on 07.10.17.
 //
 #include "list_serialize.h"
-// not pure
+// not pure. May be problems with concurrency
+
+
 bool err = false;
 FILE* file = NULL;
 static void print_to_file(list_content v){
     if(fprintf(file,"%d ",v) <= 0)
         err = true;
 }
-bool list_save(list_node* lst, const char* const filename){
+static void print_binary(const list_content v){
+    if( fwrite(&v, sizeof v, 1,file) <= 0)
+        err = true;
+}
+bool list_save_abstract(
+                        list_node* lst, const char* const filename,
+                                        const char* const file_mode,
+                        void(print_function)(list_content)){
     err = false;
-    file = fopen(filename,"w");
+    file = fopen(filename,file_mode);
 
     if(!file)
         return false;
 
-    list_for_each(lst,print_to_file);
+    list_for_each(lst,print_function);
 
     fclose(file);
     return !err;
 }
-
+bool list_save(list_node* lst, const char* const filename){
+    return list_save_abstract(lst,filename,"w",print_to_file);
+}
+bool list_save_binary(list_node* lst, const char* const filename){
+    return list_save_abstract(lst,filename,"wb",print_binary);
+}
 list_node* read_list_from_stream(FILE* stream,const size_t max_buffer){
     char input_buffer[max_buffer];
     fgets(input_buffer, max_buffer,stream);
@@ -52,4 +66,6 @@ bool list_load(list_node** lst, const char* const filename){
     fclose(file);
     return true;
 }
+
+
 
