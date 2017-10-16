@@ -3,6 +3,7 @@ CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
 
+
 INCLUDEPATH += include/
 
 HEADERS += include/list/*.h \
@@ -18,3 +19,4 @@ SOURCES += main.c \
 include(deployment.pri)
 qtcAddDeployment()
 
+QMAKE_CFLAGS += -Wall -Wextra -std=c99 -pedantic-errors -lpthread
