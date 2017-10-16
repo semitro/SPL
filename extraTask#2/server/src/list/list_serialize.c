@@ -30,6 +30,7 @@ bool list_save_abstract(
     fclose(file);
     return !err;
 }
+
 bool list_save(list_node* lst, const char* const filename){
     return list_save_abstract(lst,filename,"w",print_to_file);
 }

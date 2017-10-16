@@ -20,7 +20,7 @@ list_content list_foldl (const list_node* const list,
                          list_content(*function)(list_content,list_content));
 
 // iterate accepts the initial value s, list length n, and function f. It then generates a list
-//of length n as follows: s, f(s), f(f(s))
+// of length n as follows: s, f(s), f(f(s))
 list_node* list_iterate( const list_content s,
                          list_content(*function)(list_content), size_t length);
 #endif //LAB4_LIST_FUNCTIONS_H

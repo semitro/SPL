@@ -8,6 +8,15 @@
 #include <stdbool.h>
 #include <arpa/inet.h>
 
+#define MY_MSG_NOTIFY 0
+#define MY_MSG_LIST   1
+
+struct message{
+	char type;
+	size_t len;
+	void* data;
+};
+
 // host in ipv4
 bool connect_to(char* const host, int    port);
 // returns sended bytes. -1 if error.
