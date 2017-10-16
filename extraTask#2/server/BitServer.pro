@@ -5,12 +5,14 @@ CONFIG -= qt
 
 INCLUDEPATH += include/
 
-HEADERS += include/list/*.h
+HEADERS += include/list/*.h \
+    include/server/listener.h
 
 SOURCES += main.c \
     src/list/list.c \
     src/list/list_functions.c \
-    src/list/list_serialize.c
+    src/list/list_serialize.c \
+    src/server/listener.c
 
 
 include(deployment.pri)
