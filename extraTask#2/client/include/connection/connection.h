@@ -12,9 +12,9 @@
 #define MY_MSG_LIST   1
 
 struct message{
-	char type;
-	size_t len;
-	void* data;
+	char    type;
+	size_t  len;
+	void*   data;
 };
 
 // host in ipv4

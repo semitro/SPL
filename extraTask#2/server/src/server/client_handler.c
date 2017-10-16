@@ -24,12 +24,9 @@ void send_list(struct client *client, list_node* list){
 void handle_client(struct client client){
 	struct message *msg = malloc(64);
 	send_str(&client,"Welcome to object-popject servero, senioro!");
-    sleep(5);
-//    msg.data = "Current list:\0";
-//    msg.len  = sizeof (msg->data) / sizeof(char);
-    send_data(&client,msg);
-    sleep(5);
+
     send_list(&client, get_list());
+	free(msg);
 }
 
 

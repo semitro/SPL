@@ -27,9 +27,6 @@ int main(int argc, char** argv){
 
 void handle_msg(struct message* msg_in){
 	printf("Type: %d\n",msg_in->type);
-        *((char*)msg_in->data+1) = '\0';
-        *((char*)msg_in->data)   = 42;
-
-	if(MY_MSG_NOTIFY == msg_in->type)
-                printf("Server: %s \n",msg_in->data);
+	if(MY_MSG_NOTIFY == msg_in->type) printf("Server: %s \n",(char*)&msg_in->data);
+	if(MY_MSG_LIST   == msg_in->type) printf("Подкатил лист");
 }
