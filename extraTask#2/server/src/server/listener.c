@@ -1,19 +1,19 @@
 #include "server/listener.h"
 
 
-void(*handle_client)(struct client client);
+void(*handle_client_function)(struct client client);
 
 void set_client_handler(void(*function)(struct client client) ){
-        handle_client = function;
+		handle_client_function = function;
 }
 
 // Создание нового потока требует функци с такой сигнатурой
 void* thread_work(void* arg){
-        handle_client( *((struct client*)(arg)) );
+		handle_client_function( *((struct client*)(arg)) );
         return NULL;
 }
 
-void start(unsigned int port){
+void start_listen(unsigned int port){
 	int main_socket;
 	struct sockaddr_in server_address;
 
@@ -36,6 +36,9 @@ void start(unsigned int port){
 	   close(main_socket);
            _exit(2);
 	}
+	printf("The server is run on port %d\nWaiting for clients..\n", port);
+
+	while (1) {
 
 	// Для приходящего клиента
 	struct client new_client;
@@ -47,7 +50,6 @@ void start(unsigned int port){
 
 	pthread_t new_thread;
 	pthread_create(&new_thread,NULL,thread_work,&new_client);
+	}
 	close(main_socket);
-	close(new_client.fd);
 }
-

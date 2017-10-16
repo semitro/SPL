@@ -13,13 +13,14 @@
 #include <ctype.h>
 #include <stdbool.h>
 
-#define MAX_CONNECTION 128
-struct client{
-	struct sockaddr_in addr;
-	int fd;
-};
+#include "connection.h"
 
-void start(unsigned int port);
+#define MAX_CONNECTION 128
+
+
+void start_listen(unsigned int port);
+// То, что будет вызываться при каждом подключении
 void set_client_handler( void(*function)(struct client client) );
+
 #endif // LISTENER_H
 
