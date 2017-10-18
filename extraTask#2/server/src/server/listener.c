@@ -39,17 +39,16 @@ void start_listen(unsigned int port){
 	printf("The server is run on port %d\nWaiting for clients..\n", port);
 
 	while (1) {
+		// Для приходящего клиента
+		struct client new_client;
+		size_t new_addr_size = sizeof new_client.addr;
+		new_client.fd =
+		accept(main_socket,(struct sockaddr*)&new_client.addr, (socklen_t*)&new_addr_size);
 
-	// Для приходящего клиента
-	struct client new_client;
-	size_t new_addr_size = sizeof new_client.addr;
-        new_client.fd =
-          accept(main_socket,(struct sockaddr*)&new_client.addr, (socklen_t*)&new_addr_size);
+		printf("Подключился новый клиент: %d\n", (int)new_client.addr.sin_addr.s_addr);
 
-        printf("Подключился новый клиент: %d\n", (int)new_client.addr.sin_addr.s_addr);
-
-	pthread_t new_thread;
-	pthread_create(&new_thread,NULL,thread_work,&new_client);
+		pthread_t new_thread;
+		pthread_create(&new_thread,NULL,thread_work,&new_client);
 	}
 	close(main_socket);
 }

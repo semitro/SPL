@@ -1,6 +1,3 @@
-//
-// Created by semitro on 06.10.17.
-//
 #include "list/list_functions.h"
 
 void list_for_each(const list_node* const list, void(*function)(list_content)){
@@ -64,4 +61,12 @@ list_node* list_iterate(const list_content s,
     }
 
     return new_list;
+}
+void print_conent(list_content v){
+	printf("%d->",v);
+}
+
+void print_list(list_node const * const l){
+	list_for_each(l,print_conent);
+	puts("");
 }
