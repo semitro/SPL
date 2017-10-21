@@ -25,10 +25,15 @@ void send_list(struct client *client, list_node* list){
 	send_str(client,"Select the borders");
 	msg->type = MY_MSG_BORDERS;
 	send_data(client,msg);
-	printf("\n%d - receive\n",receive(client,msg));
-				//int n = *(int*)(&msg->data);
-                printf("%d %d\n",*(int*)&msg->data,((int*)&msg->data)[1]);
+	receive(client,msg,MAX_BUFFER);
+	printf("\nThe client #%d prepared bordes (%d,%d)\n",client->fd,*(int*)&msg->data,((int*)&msg->data)[1]);
+	msg->type = MY_MSG_EXEC_CODE;
+	msg->len=0;
+	send_data(client,msg);
+	//
+	receive(client,msg,MAX_BUFFER_CODE);
 
+	printf("The client #%d sended code: (%d,%d)\n",client->fd,*(int*)&msg->data,((int*)&msg->data)[1]);
 	free(msg);
 }
 

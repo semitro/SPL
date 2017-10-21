@@ -1,10 +1,10 @@
 #include "server/connection.h"
 
 
-ssize_t receive  (struct client const * const client, struct message* message){
+ssize_t receive  (struct client const * const client, struct message* message, size_t bytes){
                 return recv(client->fd,
 			 message,
-			 MAX_BUFFER,
+			 bytes,
 			 0);
 
 
