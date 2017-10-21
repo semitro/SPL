@@ -74,8 +74,7 @@ void handle_user_input(char type){
 
 			printf("Sended %d bytes of code",
                                send_data(msg_out,sizeof(*msg_out)+sizeof(msg_out->len)-sizeof(void*)));
-			free(file_name);
-			free(msg_out);
+		free(msg_out);
 			break;
 	}
 

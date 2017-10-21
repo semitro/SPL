@@ -12,7 +12,7 @@ ssize_t receive  (struct client const * const client, struct message* message, s
 
 
 ssize_t send_data(struct client const * const client, struct message const * const message){
-		sleep(1);
+
 
         return send(            client->fd,
                                 message,
