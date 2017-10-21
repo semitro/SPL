@@ -23,6 +23,7 @@ struct message{
 	void*   data;
 };
 
+
 #define MAX_BUFFER 512
 ssize_t receive  (struct client const * const client, struct message       *	   message, size_t bytes);
 ssize_t send_data(struct client const * const client, struct message const * const message);

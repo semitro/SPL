@@ -10,7 +10,8 @@ HEADERS += include/list/*.h \
     include/server/listener.h \
     include/server/client_handler.h \
     include/server/connection.h \
-    include/server/server.h
+    include/server/server.h \
+    include/list_keeper.h
 
 SOURCES += main.c \
     src/list/list.c \
@@ -19,7 +20,8 @@ SOURCES += main.c \
     src/server/listener.c \
     src/server/client_handler.c \
     src/server/connection.c \
-    src/server/server.c
+    src/server/server.c \
+    src/list_keeper.c
 
 
 include(deployment.pri)

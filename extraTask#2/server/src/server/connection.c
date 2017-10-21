@@ -1,6 +1,5 @@
 #include "server/connection.h"
 
-
 ssize_t receive  (struct client const * const client, struct message* message, size_t bytes){
                 return recv(client->fd,
 			 message,
@@ -9,10 +8,10 @@ ssize_t receive  (struct client const * const client, struct message* message, s
 
 
 }
-
+struct timespec t;
 
 ssize_t send_data(struct client const * const client, struct message const * const message){
-
+		sleep(1);
 
         return send(            client->fd,
                                 message,

@@ -54,9 +54,7 @@ void handle_user_input(char type){
 			scanf("%d %d",  &n1, &n2);
 			*((int*)msg_out->data)    = n1;
 			((int*)&msg_out->data)[1] = n2;
-			printf("dd %d dd\n", ((int*)&msg_out->data)[1]);
-			printf("\nSended %d bytes\n",
-				   send_data(msg_out, sizeof(*msg_out) + sizeof(int)*2 - sizeof(void*)));
+			send_data(msg_out, sizeof(*msg_out) + sizeof(int)*2 - sizeof(void*));
 
 			free(msg_out);
 			break;
