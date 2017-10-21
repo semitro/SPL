@@ -9,7 +9,7 @@ void set_client_handler(void(*function)(struct client client) ){
 
 // Создание нового потока требует функци с такой сигнатурой
 void* thread_work(void* arg){
-		handle_client_function( *((struct client*)(arg)) );
+        handle_client_function( *((struct client*)(arg)) );
         return NULL;
 }
 

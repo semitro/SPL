@@ -25,7 +25,6 @@ bool connect_to(char * const host, int port){
 
 
 ssize_t send_data(const void * const data, size_t len){
-
 	return send(network_socket,data,len,MSG_NOSIGNAL);
 }
 

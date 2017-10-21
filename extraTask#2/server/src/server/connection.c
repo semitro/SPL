@@ -1,16 +1,19 @@
 #include "server/connection.h"
-#include "string.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <pthread.h>
-#include <unistd.h>
 
-ssize_t receive  (struct client const * const client, struct message       * const message){
+
+ssize_t receive  (struct client const * const client, struct message* message){
+                return recv(client->fd,
+			 message,
+			 MAX_BUFFER,
+			 0);
+
 
 }
 
+
 ssize_t send_data(struct client const * const client, struct message const * const message){
 		sleep(1);
+
         return send(            client->fd,
                                 message,
                                 message->len + sizeof(*message) - sizeof(message->data),

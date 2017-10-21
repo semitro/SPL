@@ -8,9 +8,10 @@
 #include <stdbool.h>
 #include <arpa/inet.h>
 
-#define MY_MSG_NOTIFY 0
-#define MY_MSG_LIST   1
-
+#define MY_MSG_NOTIFY		0
+#define MY_MSG_LIST			1
+#define MY_MSG_EXEC_CODE	2
+#define MY_MSG_BORDERS		3
 struct message{
 	char    type;
 	size_t  len;
