@@ -1,6 +1,4 @@
 #include "server/client_handler.h"
-#include <sys/mman.h>
-#include <errno.h>
 
 void send_list(struct client *client, list_node* list){
 
@@ -36,7 +34,11 @@ void handle_client(struct client client){
 	msg->type = MY_MSG_BORDERS;
 	send_data(&client,msg);
 	receive(&client,msg,MAX_BUFFER);
-	printf("\nThe client #%d prepared bordes (%d,%d)\n",client.fd,*(int*)&msg->data,((int*)&msg->data)[1]);
+
+	// Индексы от и до листа, для которых применится присланный код
+	size_t from_border =  *(int*)&msg->data;
+	size_t to_border   =  ((int*)&msg->data)[1];
+
 	msg->type = MY_MSG_EXEC_CODE;
 	msg->len=0;
 	send_data(&client,msg);
@@ -47,11 +49,11 @@ void handle_client(struct client client){
 	msg  = mmap(NULL, MAX_BUFFER_CODE,
 				PROT_EXEC | PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 	//
-	printf("Receive %d bytes\n ", receive(&client,msg,MAX_BUFFER_CODE));
+	receive(&client,msg,MAX_BUFFER_CODE);
 
-	printf("The client #%d sended %d bytes of an elf-file\n", client.fd, msg->len);
-
-	apply_elf64_on_list(&msg->data,0,15);
+	printf("The client #%d is applying %d bytes of an elf-file on borders(%d,%d)\n",
+		   client.fd, msg->len, MIN(from_border,to_border),MAX(from_border,to_border));
+	apply_elf64_on_list(&msg->data,MIN(from_border,to_border),MAX(from_border,to_border));
 	print_list(get_list());
 }
 

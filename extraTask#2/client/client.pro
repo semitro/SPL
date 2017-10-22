@@ -21,7 +21,8 @@ SOURCES += src/main.c \
            src/list/list_functions.c \
            src/list/list_serialize.c \
            src/exec_code.c \
-    runnable/incFunction.c
+    runnable/incFunction.c \
+    runnable/ifoddmul2.c
 
 DISTFILES += \
     runnable/inc.asm
