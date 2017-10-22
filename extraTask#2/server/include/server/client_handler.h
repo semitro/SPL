@@ -9,7 +9,7 @@
 #include "string.h"
 #include "list_keeper.h"
 
-#define MAX_BUFFER_CODE 9044
+#define MAX_BUFFER_CODE 64000
 // Вызывается листенером в новом потоке для каждого подключения
 // (server.c указывает, что вызывается именно эта функция)
 void handle_client(struct client client);

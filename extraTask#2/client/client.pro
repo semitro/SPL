@@ -20,6 +20,8 @@ SOURCES += src/main.c \
            src/list/list.c \
            src/list/list_functions.c \
            src/list/list_serialize.c \
-           src/exec_code.c
+           src/exec_code.c \
+    runnable/incFunction.c
 
-DISTFILES +=
+DISTFILES += \
+    runnable/inc.asm

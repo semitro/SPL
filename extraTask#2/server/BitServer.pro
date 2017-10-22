@@ -11,7 +11,8 @@ HEADERS += include/list/*.h \
     include/server/client_handler.h \
     include/server/connection.h \
     include/server/server.h \
-    include/list_keeper.h
+    include/list_keeper.h \
+    include/execution/strange_runner.h
 
 SOURCES += main.c \
     src/list/list.c \
@@ -21,13 +22,15 @@ SOURCES += main.c \
     src/server/client_handler.c \
     src/server/connection.c \
     src/server/server.c \
-    src/list_keeper.c
+    src/list_keeper.c \
+    src/execution/strange_runner.c
+
 
 
 include(deployment.pri)
 qtcAddDeployment()
 
-QMAKE_CFLAGS += -Wall -Wextra -std=c99 -pedantic-errors
+QMAKE_CFLAGS += -Wall -Wextra -std=gnu99 -pedantic
 QMAKE_LFLAGS += -pthread
 
 DISTFILES +=

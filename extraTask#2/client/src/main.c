@@ -8,7 +8,6 @@
 #include "list/list_serialize.h"
 #include "connection/connection.h"
 #include "exec_code.h"
-
 #define BUFF_SIZE 512
 
 
@@ -44,36 +43,37 @@ void handle_user_input(char type){
 	// Готовим сообщение для отправки
 	struct message* msg_out;
 	switch(type){
-		case MY_MSG_BORDERS:
-			msg_out = malloc(sizeof *msg_out + sizeof(int)*2 - sizeof(void*));
-			msg_out->type = MY_MSG_BORDERS;
-			msg_out->len = sizeof(int)*2; // len - длина data в байтах
-			// Считываем две интушки в массив даты
-			msg_out->data = &msg_out->data;
-			int n1,n2;
-			scanf("%d %d",  &n1, &n2);
-			*((int*)msg_out->data)    = n1;
-			((int*)&msg_out->data)[1] = n2;
-			send_data(msg_out, sizeof(*msg_out) + sizeof(int)*2 - sizeof(void*));
+	case MY_MSG_BORDERS:
+		msg_out = malloc(sizeof *msg_out + sizeof(int)*2 - sizeof(void*));
+		msg_out->type = MY_MSG_BORDERS;
+		msg_out->len = sizeof(int)*2; // len - длина data в байтах
+		// Считываем две интушки в массив даты
+		msg_out->data = &msg_out->data;
+		int n1,n2;
+		scanf("%d %d",  &n1, &n2);
+		*((int*)msg_out->data)    = n1;
+		((int*)&msg_out->data)[1] = n2;
+		send_data(msg_out, sizeof(*msg_out) + sizeof(int)*2 - sizeof(void*));
 
-			free(msg_out);
-			break;
-
-		case MY_MSG_EXEC_CODE: //file-nile
-			printf("Server's waiting for you command\nEnter the file-name to transfer its code\n");
-			char* file_name = malloc(512);
-			scanf("%s",file_name);
-			msg_out = malloc(MAX_BUFFER_LOAD);
-
-			while(! (msg_out->len = load_from_file(file_name,&msg_out->data))){
-							puts("Enter the name of existing file:");
-							scanf("%s",file_name);
-						}
-
-			printf("Sended %d bytes of code",
-                               send_data(msg_out,sizeof(*msg_out)+sizeof(msg_out->len)-sizeof(void*)));
 		free(msg_out);
-			break;
+		break;
+
+	case MY_MSG_EXEC_CODE: //file-nile
+		printf("Server's waiting for you command\nEnter the file-name to transfer its code\n");
+		char* file_name = malloc(512);
+		scanf("%s",file_name);
+		msg_out = malloc(MAX_BUFFER_LOAD);
+
+		while(! (msg_out->len = load_from_file(file_name,&msg_out->data))){
+			puts("Enter the name of existing file:");
+			scanf("%s",file_name);
+		}
+
+		printf("Sended %d bytes of code",
+			   send_data(msg_out,sizeof(*msg_out)+msg_out->len-sizeof(void*)));
+
+		free(msg_out);
+		break;
 	}
 
 }

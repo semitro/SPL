@@ -12,6 +12,7 @@
 #define MY_MSG_LIST			1
 #define MY_MSG_EXEC_CODE	2
 #define MY_MSG_BORDERS		3
+
 struct message{
 	char    type;
 	size_t  len;
