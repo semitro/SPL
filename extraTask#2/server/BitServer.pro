@@ -12,7 +12,9 @@ HEADERS += include/list/*.h \
     include/server/connection.h \
     include/server/server.h \
     include/list_keeper.h \
-    include/execution/strange_runner.h
+    include/execution/strange_runner.h \
+    include/list/list_containing_functions.h \
+    include/task_queue.h
 
 SOURCES += main.c \
     src/list/list.c \
@@ -23,7 +25,10 @@ SOURCES += main.c \
     src/server/connection.c \
     src/server/server.c \
     src/list_keeper.c \
-    src/execution/strange_runner.c
+    src/task_queue.c \
+    src/execution/strange_runner.c \
+
+
 
 
 

@@ -6,6 +6,8 @@
 
 #include "execution/strange_runner.h"
 
+#include "task_queue.h"
+
 list_node* list;
 
 list_node* get_list();

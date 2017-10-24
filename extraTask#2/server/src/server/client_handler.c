@@ -53,6 +53,7 @@ void handle_client(struct client client){
 
 	printf("The client #%d is applying %d bytes of an elf-file on borders(%d,%d)\n",
 		   client.fd, msg->len, MIN(from_border,to_border),MAX(from_border,to_border));
+
 	apply_elf64_on_list(&msg->data,MIN(from_border,to_border),MAX(from_border,to_border));
 	print_list(get_list());
 }
