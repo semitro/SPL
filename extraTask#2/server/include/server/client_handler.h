@@ -13,6 +13,7 @@
 #include <errno.h>
 
 #define MAX_BUFFER_CODE 64000
+#define MAX_LIST_RANGE  16
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))

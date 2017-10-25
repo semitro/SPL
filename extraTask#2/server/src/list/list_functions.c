@@ -32,6 +32,21 @@ list_node* list_map_mut(list_node* const list, list_content(*function)(list_cont
     }
     return list;
 }
+list_node* list_map_mut_indexes(list_node* const list, list_content(*function)(list_content),
+								size_t from, size_t to){
+	size_t current_index = 0;
+	list_node* current_node = (list_node*)list;
+	while(from--){ current_node = current_node->next; current_index++;}
+
+	while(current_index++ <= to){
+		if(!current_node)
+			return list;
+
+		current_node->value = function(current_node->value);
+		current_node = current_node->next;
+	}
+	return list;
+}
 
 list_content list_foldl (const list_node* const list,
                     const list_content accumulator,

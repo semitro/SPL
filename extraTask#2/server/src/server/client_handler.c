@@ -50,12 +50,17 @@ void handle_client(struct client client){
 				PROT_EXEC | PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 	//
 	receive(&client,msg,MAX_BUFFER_CODE);
+	if(from_border < 0 || to_border < 0 || MAX (from_border, to_border) > MAX_LIST_RANGE){
+		send_str(&client, "Отказ: недопустимые границы");
+		printf("The client #%d has just tried to enter unsupported borders (%d, %d)" );
+	}
+	else{
+		printf("The client #%d is applying %d bytes of an elf-file on borders(%d,%d)\n",
+			   client.fd, msg->len, MIN(from_border,to_border),MAX(from_border,to_border));
 
-	printf("The client #%d is applying %d bytes of an elf-file on borders(%d,%d)\n",
-		   client.fd, msg->len, MIN(from_border,to_border),MAX(from_border,to_border));
-
-	apply_elf64_on_list(&msg->data,MIN(from_border,to_border),MAX(from_border,to_border));
-	print_list(get_list());
+		apply_elf64_on_list(&msg->data,MIN(from_border,to_border),MAX(from_border,to_border));
+		print_list(get_list());
+	}
 }
 
 

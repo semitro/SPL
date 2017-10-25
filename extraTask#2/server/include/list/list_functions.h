@@ -15,6 +15,9 @@ list_node* list_map(const list_node* const list, list_content(*function)(list_co
 // As the list_map, but it changes the source list. Return the same pointer witch accepts
 list_node* list_map_mut(list_node* const list, list_content(*function)(list_content));
 
+list_node* list_map_mut_indexes(list_node* const list, list_content(*function)(list_content),
+								size_t from, size_t to);
+
 // Ordered apply for each element of the list this way: accumulator = f(accumulator, list_node_i->value)
 list_content list_foldl (const list_node* const list,
                          const list_content accumulator,
