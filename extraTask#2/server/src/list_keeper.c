@@ -17,7 +17,7 @@ void init_list(size_t size){
 // Не заботится о concurrency. Это дело task_queue
 pthread_mutex_t mutx;
 void do_this_with_list(list_content(*f)(list_content), size_t index_from, size_t index_to){
-
+		printf("Исполняю %p на границе [%d,%d]",f,index_from,index_to);
         list_map_mut(get_list(),f);
 }
 

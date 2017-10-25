@@ -13,7 +13,7 @@ struct entry{
 	size_t from;
 	size_t to;
 };
-
+static void walking_deamon();
 pthread_mutex_t mutex; // Позволяет одновременно выполняться ЛИБО add_task,
 					   //  ЛИБО проходу walking_deamon'а
 void add_task(void* function,size_t from,size_t to){
@@ -37,8 +37,14 @@ static void walking_deamon(){
         pthread_mutex_lock(&mutex);
 
         for(i_entry = queue_head.tqh_first;i_entry != NULL;
-            i_entry = i_entry->entries.tqe_next)
+			i_entry = i_entry->entries.tqe_next){
             puts("Мы внутри листа!");
+			do_this_with_list(i_entry->function,i_entry->from,i_entry->to);
+			struct entry *to_free = i_entry;
+
+                        TAILQ_REMOVE(&queue_head,i_entry,entries);
+			free(to_free);
+		}
 
         pthread_mutex_unlock(&mutex);
     }
