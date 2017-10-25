@@ -29,13 +29,13 @@ static bool is_there_busy(size_t from, size_t to){
     while(from <= to)
         if(BUSY_ == is_index_lock[from++])
             return true;
-        else
-            return false;
+
+	return false;
 }
-// Заблокироать доступ к указанной части листа
-static void busy(size_t from, size_t to){
+// Заблокироать/разблокировать доступ к указанной части листа
+static void set_busy(size_t from, size_t to, char busy){
     while(from <= to)
-        is_index_lock[from++] = BUSY_;
+		is_index_lock[from++] = busy;
 }
 
 static void walking_deamon();
@@ -54,6 +54,21 @@ void add_task(void* function,size_t from,size_t to){
         /*UNLOCK*/
 }
 
+struct list_task{
+	void* function;
+	size_t from; // Индексы для листа
+	size_t to;
+};
+
+// Вызывается в новом потоке walink_deamon'ом
+// для независимых участков листа
+// (блокирует соответствующий range, выполняет задание, освобождает участок)
+static void task_work(struct list_task* task){
+        set_busy(task->from, task->to, BUSY_);
+        do_this_with_list(task->function, task->from,task->to);
+        set_busy(task->from, task->to, FREE_);
+}
+
 // Демон, смотрящий, можно ли выполнить это задание, и выполняющий
 static void walking_deamon(){
     struct entry* i_entry;
@@ -61,7 +76,6 @@ static void walking_deamon(){
     while(1){
 
         sleep(1);
-        puts("Я проснулся!");
         /*LOCK*/
         pthread_mutex_lock(&mutex);
 
@@ -69,11 +83,15 @@ static void walking_deamon(){
             i_entry = i_entry->entries.tqe_next){
             puts("Мы внутри листа!");
             if(!is_there_busy(i_entry->from,i_entry->to)){ // Если в ранге имеются необрабатываемые элементы
-                // Занять область
-                busy(i_entry->from,i_entry->to);
-                do_this_with_list(i_entry->function,i_entry->from,i_entry->to);
-                struct entry *to_free = i_entry;
 
+				struct list_task task_data;
+				task_data.function = i_entry->function;
+				task_data.from     = i_entry->from    ;
+				task_data.to       = i_entry->to      ;
+				pthread_t to_perfrom_on_list;
+                                pthread_create(&to_perfrom_on_list, NULL, &task_work, &task_data);
+
+				struct entry *to_free = i_entry;
                 TAILQ_REMOVE(&queue_head,i_entry,entries);
                 free(to_free);
             }

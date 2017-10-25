@@ -58,7 +58,13 @@ void handle_client(struct client client){
 		printf("The client #%d is applying %d bytes of an elf-file on borders(%d,%d)\n",
 			   client.fd, msg->len, MIN(from_border,to_border),MAX(from_border,to_border));
 
-		apply_elf64_on_list(&msg->data,MIN(from_border,to_border),MAX(from_border,to_border));
+		if(apply_elf64_on_list(&msg->data, MIN(from_border,to_border), MAX(from_border,to_border))){
+			send_str(&client, "Ваш запрос принят");
+		}
+		else
+		{
+			send_str(&client, "Запрос не принят. Вы отправили эльфа?");
+		}
 		print_list(get_list());
 	}
 }

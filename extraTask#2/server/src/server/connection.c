@@ -22,16 +22,18 @@ ssize_t send_data(struct client const * const client, struct message const * con
 ssize_t send_str(struct client const* const client, const char* const str){
 	// - sizeof void*, потому что массив внутри и есть входящий массив char
 	struct message * const msg = malloc(strlen(str) + sizeof(struct message) - sizeof(void*));
-	memset(msg,0,sizeof msg);
+	void const * const p = msg;
+	memset(msg, 0, strlen(str) + sizeof(struct message) - sizeof(void*));
 	msg->len  = strlen(str);
 	msg->type = MY_MSG_NOTIFY;
 	// now the structure is like an array with additional attributes
 	// like len and type
 	msg->data = &(msg->data);
 	strcpy((char*)msg->data,str);
-        ssize_t res = send_data(client,msg);
+	ssize_t res = send_data(client,msg);
 
-	free(msg);
+	free(p);
+//	msg = NULL;
 
-        return res;
+	return res;
 }

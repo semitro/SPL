@@ -17,12 +17,12 @@ void init_list(size_t size){
 // Не заботится о concurrency. Это дело task_queue
 pthread_mutex_t mutx;
 void do_this_with_list(list_content(*f)(list_content), size_t index_from, size_t index_to){
-		printf("Исполняю %p на границе [%d,%d]",f,index_from,index_to);
-                list_map_mut_indexes(get_list(), f, index_from, index_to);
+	printf("Исполняю %p на границе [%d,%d]\n",f,index_from,index_to);
+	list_map_mut_indexes(get_list(), f, index_from, index_to);
 }
 
 // Нужно реализовать поток-демон, выполняющий задания
-void apply_elf64_on_list(void* elf64hdr,size_t index_from, size_t index_to){
+bool apply_elf64_on_list(void* elf64hdr,size_t index_from, size_t index_to){
 	list_content(*f)(list_content) = get_function(elf64hdr);
 	if(!f){
 		if(get_error() == _NOT_ELF_FILE_ERR)
@@ -30,9 +30,10 @@ void apply_elf64_on_list(void* elf64hdr,size_t index_from, size_t index_to){
 		else
 			if(get_error() == _NO_SYMBOL_SECTION)
 				perror("There's no symtab in the elf64-data!");
-		else
+			else
 				perror("Something wrong with function loading.");
-		return;
+		return false;
 	}
 	add_task(f,index_from,index_to);
+	return true;
 }
