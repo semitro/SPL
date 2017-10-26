@@ -23,7 +23,9 @@ SOURCES += src/main.c \
            src/exec_code.c \
     runnable/incFunction.c \
     runnable/ifoddmul2.c \
-    runnable/forever.c
+    runnable/forever.c \
+    runnable/mul7.c \
+    runnable/zero.c
 
 DISTFILES += \
     runnable/inc.asm

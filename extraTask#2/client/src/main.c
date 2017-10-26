@@ -25,11 +25,13 @@ int main(int argc, char** argv){
 
 	struct message *msg_in = malloc(BUFF_SIZE);
 	while(1){
-				memset       (msg_in,0,BUFF_SIZE);
-				if(receive_data (msg_in,BUFF_SIZE))
-					handle_msg   (msg_in);
+		memset(msg_in,0,BUFF_SIZE);
+		if(receive_data (msg_in,BUFF_SIZE))
+		{
+			handle_msg  (msg_in);
+		}
 	}
-        free(msg_in);
+	free(msg_in);
 	return 0;
 }
 
@@ -59,7 +61,7 @@ void handle_user_input(char type){
 		break;
 
 	case MY_MSG_EXEC_CODE: //file-nile
-		printf("Server's waiting for you command\nEnter the file-name to transfer its code\n");
+		printf("Enter the file-name to transfer its code\n");
 		printf("You:\t");
 		char* file_name = malloc(512);
 		scanf("%s",file_name);
@@ -70,8 +72,7 @@ void handle_user_input(char type){
 			scanf("%s",file_name);
 		}
 
-		printf("Sended %d bytes of code",
-			   send_data(msg_out,sizeof(*msg_out)+msg_out->len-sizeof(void*)));
+		send_data(msg_out,sizeof(*msg_out)+msg_out->len-sizeof(void*));
 
 		free(msg_out);
 		break;
@@ -90,7 +91,7 @@ void handle_msg(struct message* msg_in){
 		l =  list_take(msg_in);
 		list_for_each(l,print_list);
 		list_free(&l);
-		puts("X");
+		puts("");
 		break;
 	case MY_MSG_EXEC_CODE:
 	case MY_MSG_BORDERS:
@@ -106,9 +107,9 @@ list_node* list_take(const struct message* const msg){
 
 	while(i < size)
 		if(l)
-		 list_add_back  ((list_content) ((list_content*)&msg->data)[i++],&l);
-			else
-		 l = list_create((list_content) ((list_content*)&msg->data)[i++]);
+			list_add_back  ((list_content) ((list_content*)&msg->data)[i++],&l);
+		else
+			l = list_create((list_content) ((list_content*)&msg->data)[i++]);
 
-    return l;
+	return l;
 }

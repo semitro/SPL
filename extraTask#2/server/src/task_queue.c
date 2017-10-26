@@ -42,16 +42,16 @@ static void walking_deamon();
 pthread_mutex_t mutex; // Позволяет одновременно выполняться ЛИБО add_task,
                       //  ЛИБО проходу walking_deamon'а
 void add_task(void* function,size_t from,size_t to){
-        /*LOCK*/
+	/*LOCK*/
 	pthread_mutex_lock(&mutex);
-		printf("Добавляю задание %p  для (%d,%d)\n",function,from,to);
-        struct entry* new_task = malloc( sizeof(struct entry) );
-        new_task->from = from;
-        new_task->to = to;
-        new_task->function = function;
-        TAILQ_INSERT_TAIL(&queue_head,new_task,entries);
+	printf("Добавляю задание %p  для (%d,%d)\n",function,from,to);
+	struct entry* new_task = malloc( sizeof(struct entry) );
+	new_task->from = from;
+	new_task->to = to;
+	new_task->function = function;
+	TAILQ_INSERT_TAIL(&queue_head,new_task,entries);
 	pthread_mutex_unlock(&mutex);
-        /*UNLOCK*/
+	/*UNLOCK*/
 }
 
 struct list_task{
@@ -81,7 +81,7 @@ static void walking_deamon(){
 
         for(i_entry = queue_head.tqh_first;i_entry != NULL;
             i_entry = i_entry->entries.tqe_next){
-            puts("Мы внутри листа!");
+//            puts("Мы внутри листа!");
             if(!is_there_busy(i_entry->from,i_entry->to)){ // Если в ранге имеются необрабатываемые элементы
 
 				struct list_task task_data;
