@@ -15,7 +15,7 @@ struct image* apply_transform(struct image *img, transform **t, int originX, int
     new_img->width   = abs(right_x - top_x);
     new_img->height  = abs(right_y - top_y);
 
-    new_img->data = malloc(new_img->height*new_img->width*sizeof(struct pixel));
+	new_img->data = malloc(new_img->height*new_img->width*sizeof(struct pixel));
 
     printf("Width : %d\n", new_img->width );
     printf("Height: %d\n", new_img->height );
@@ -24,22 +24,26 @@ struct image* apply_transform(struct image *img, transform **t, int originX, int
     printf("Height: %d\n", img->height );
 
 
-    originX = MIN(top_x,right_x);
+	originX = MIN(top_x, right_x);
     originY = MIN(top_y, right_y);
     printf("%d\n", originX);
-    printf("%d\n", originY);
+	printf("%d\n", originY);
 
 
-    for(int j = 0; j < new_img->height; j++){
-        for(int i = 0; i < new_img->width; i++){
-			new_img->data[new_img->width*j + i] = img->data[img->width*j+i];
-//            new_img->data
-//                    [(int)( new_img->width*(  i*t[1][0] + j*t[1][1] - originY )
-//                    +  i*t[0][0] + j*t[0][1] - originX) ]
-//                    = img->data
-//                    [           i   +  img->width*j];
-        }
-    }
+	for(int j = 0;     j < img->height; j++){
+		for(int i = 0; i < img->width; i++){
+		if((int)( new_img->width*(  i*t[1][0] + j*t[1][1]) +  i*t[0][0] + j*t[0][1]) - originX < 0)
+			printf("i: %d j: %d \n",i,j);
+//			printf("%d\n",(int)( new_img->width*(  i*t[1][0] + j*t[1][1]) +  i*t[0][0] + j*t[0][1]) - originX);
 
-    return new_img;
+			new_img->data
+					[(int)( new_img->width*(  i*t[1][0] + j*t[1][1] - originY)
+					+  i*t[0][0] + j*t[0][1]) - originX + 1]
+					= img->data
+					[           i   +  img->width*j];
+		}
+	printf("%d\n",j);
+	}
+
+	return new_img;
 }
