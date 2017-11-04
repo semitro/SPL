@@ -5,6 +5,10 @@
 
 #include "image.h"
 
-struct image* apply_transform(struct image * img, int **t);
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define MAX(a,b) (((a)>(b))?(a):(b))
+
+typedef float transform;
+struct image* apply_transform(struct image * img, transform **t, int originX, int originY);
 #endif // TRANSFORM_H
 
