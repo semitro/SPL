@@ -30,8 +30,6 @@ SOURCES += main.c \
 
 
 
-
-
 include(deployment.pri)
 qtcAddDeployment()
 
