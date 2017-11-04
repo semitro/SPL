@@ -10,6 +10,7 @@
 #include "image.h"
 
 #define BMP_SIGNATURE 0x4D42
+#define BMP_PADDING   4
 
 struct __attribute__((packed))
 	bmp_header {

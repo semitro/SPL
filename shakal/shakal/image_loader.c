@@ -22,17 +22,28 @@ enum read_status from_bmp(FILE *in, struct image* img){
 
 	img->height = header.biHeight;
 	img->width  = header.biWidth ;
-	img->data = malloc(header.biSizeImage);
-	if(1 != fread(img->data, header.biSizeImage, 1, in) ){
-		return READ_INVALID_BITS;
+	img->data = malloc(img->width*img->height*sizeof(struct pixel));
+
+	// for padding, skipping
+	char empty[3];
+	for(int i = 0; i < header.biHeight;i++){
+                if(1 != fread(img->data + img->width*i, img->width*sizeof(struct pixel), 1, in) ){
+			return READ_INVALID_BITS;
+		}
+		// Учитывая выравнивние
+		fread(empty,header.biWidth%BMP_PADDING,1,in);
 	}
-	else
+
 		return READ_OK;
 }
 struct bmp_header generate_header(const struct image * img){
-	header_prototype.biSizeImage = img->height * img->width * sizeof(struct pixel);
+        header_prototype.biSizeImage = img->height * img->width * sizeof(struct pixel)
+                + (img->width%BMP_PADDING)*img->height;
+
 	header_prototype.bfileSize   = sizeof(header_prototype)
 			+ header_prototype.biSizeImage;
+	header_prototype.biWidth  = img->width;
+	header_prototype.biHeight = img->height;
 	return header_prototype;
 	//	struct bmp_header header;
 	//	header.biHeight    = img->height;
@@ -45,17 +56,21 @@ struct bmp_header generate_header(const struct image * img){
 }
 
 enum write_status to_bmp(FILE *out, const struct image *img){
+
 	struct bmp_header header = generate_header(img);
 
-	header.biWidth  = img->width ;
-	header.biHeight = img->height;
 
 	if( 1 != fwrite(&header,sizeof(header),1,out)){
 		return WRITE_ERROR;
 	}
 
-	if( 1 != fwrite(img->data, header.biSizeImage, 1, out)){
-		return WRITE_ERROR;
+	for(int i = 0; i < header.biHeight;i++){
+		if(1 != fwrite(img->data + i*header.biWidth, header.biWidth*sizeof(struct pixel), 1, out))
+			return WRITE_ERROR;
+
+		// Учитывая выравнивние. Записываем какой угодно остаток байт
+                fwrite(img->data,header.biWidth%BMP_PADDING,1,out);
 	}
+
 	return WRITE_OK;
 }
