@@ -9,3 +9,7 @@ INCLUDEPATH += include/
 include(deployment.pri)
 qtcAddDeployment()
 
+HEADERS += \
+    image.h \
+    image_loader.h
+
