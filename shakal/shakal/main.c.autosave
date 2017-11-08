@@ -34,7 +34,7 @@ int main(int argc, char** argv)
 		}
 		case READ_INVALID_SIGNATURE:{
 			puts("The file doesn't have bmp magic-number");
-			puts("Are you sure that the file is .bmp?");
+			puts("Are you sure that this is the bmp-file?");
 			break;
 		}
 		case READ_INVALID_BITS:
