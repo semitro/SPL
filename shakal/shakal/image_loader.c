@@ -27,38 +27,31 @@ enum read_status from_bmp(FILE *in, struct image* img){
 	// for padding, skipping
 	char empty[3];
 	for(int i = 0; i < header.biHeight;i++){
-                if(1 != fread(img->data + img->width*i, img->width*sizeof(struct pixel), 1, in) ){
+		if(1 != fread(img->data + img->width*i, img->width*sizeof(struct pixel), 1, in) ){
 			return READ_INVALID_BITS;
 		}
 		// Учитывая выравнивние
-		fread(empty,(BMP_PADDING-header.biWidth%BMP_PADDING) %BMP_PADDING,1,in);
+		fread(empty,((BMP_PADDING-(header.biWidth*sizeof(struct pixel))%BMP_PADDING) %BMP_PADDING), 1, in);
 	}
 
-		return READ_OK;
+	return READ_OK;
 }
 struct bmp_header generate_header(const struct image * img){
-        header_prototype.biSizeImage = img->height * img->width * sizeof(struct pixel)
-                                + ((BMP_PADDING-header_prototype.biWidth%BMP_PADDING) %BMP_PADDING)*img->height;
-
-	header_prototype.bfileSize   = sizeof(header_prototype)
-			+ header_prototype.biSizeImage;
 	header_prototype.biWidth  = img->width;
 	header_prototype.biHeight = img->height;
+
+	header_prototype.biSizeImage = img->height * img->width * sizeof(struct pixel)
+                        + ((BMP_PADDING-(img->width*sizeof(struct pixel))%BMP_PADDING) %BMP_PADDING)*img->height*sizeof(struct pixel);
+
+	header_prototype.bfileSize = sizeof(struct bmp_header)+ header_prototype.biSizeImage;
+
 	return header_prototype;
-	//	struct bmp_header header;
-	//	header.biHeight    = img->height;
-	//	header.biWidth     = img->width;
-	//	header.bfType      = BMP_SIGNATURE;
-	//	header.biSizeImage = img->height * img->width * sizeof(struct pixel);
-	//	header.bfileSize   = sizeof(header) + header.biSizeImage;
-	//	header.bOffBits    = sizeof header;
-	//	return header;
+
 }
 
 enum write_status to_bmp(FILE *out, const struct image *img){
 
 	struct bmp_header header = generate_header(img);
-
 	if( 1 != fwrite(&header,sizeof(header),1,out)){
 		return WRITE_ERROR;
 	}
@@ -67,7 +60,7 @@ enum write_status to_bmp(FILE *out, const struct image *img){
 		if(1 != fwrite(img->data + i*header.biWidth, header.biWidth*sizeof(struct pixel), 1, out))
 			return WRITE_ERROR;
 		// Учитывая выравнивние. Записываем какой угодно остаток байт
-				fwrite(img->data,(BMP_PADDING-header.biWidth%BMP_PADDING) %BMP_PADDING, 1, out);
+                fwrite(img->data,((BMP_PADDING - (header.biWidth*sizeof(struct pixel))%BMP_PADDING) %BMP_PADDING), 1, out);
 	}
 
 	return WRITE_OK;

@@ -35,9 +35,9 @@ struct image* apply_transform(struct image *img, transform **t, int originX, int
 
 
 		struct pixel p = {0,0,0};
-//		for(int i = 0; i < new_img->height; i++)
-//			for(int j = 0; j < new_img->width; j++)
-//				new_img->data[j + new_img->width*i]= p;
+		for(int i = 0; i < new_img->height; i++)
+			for(int j = 0; j < new_img->width; j++)
+				new_img->data[j + new_img->width*i]= p;
 
 
 		for(int j = 0;     j < img->height; j++){
