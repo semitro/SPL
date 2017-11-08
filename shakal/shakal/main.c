@@ -32,10 +32,10 @@ int main(int argc, char** argv)
 	t[0] = malloc(sizeof(transform)*2);
 	t[1] = malloc(sizeof(transform)*2);
 
-	t[0][0] =  0.f;
-	t[1][0] =  1.f;
+	t[0][0] =  1.f;
+	t[1][0] =  0.f;
 	t[0][1] =  1.f;
-	t[1][1] =  0.f;
+	t[1][1] =  1.f;
 
 		if( to_bmp(fopen("out.bmp", "wb"), apply_transform(&img,t,0,0)) == WRITE_OK){
 		puts("The file has been stored!");
