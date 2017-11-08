@@ -31,14 +31,14 @@ enum read_status from_bmp(FILE *in, struct image* img){
 			return READ_INVALID_BITS;
 		}
 		// Учитывая выравнивние
-		fread(empty,header.biWidth%BMP_PADDING,1,in);
+		fread(empty,(BMP_PADDING-header.biWidth%BMP_PADDING) %BMP_PADDING,1,in);
 	}
 
 		return READ_OK;
 }
 struct bmp_header generate_header(const struct image * img){
         header_prototype.biSizeImage = img->height * img->width * sizeof(struct pixel)
-                + (img->width%BMP_PADDING)*img->height;
+                                + ((BMP_PADDING-header_prototype.biWidth%BMP_PADDING) %BMP_PADDING)*img->height;
 
 	header_prototype.bfileSize   = sizeof(header_prototype)
 			+ header_prototype.biSizeImage;
@@ -59,7 +59,6 @@ enum write_status to_bmp(FILE *out, const struct image *img){
 
 	struct bmp_header header = generate_header(img);
 
-
 	if( 1 != fwrite(&header,sizeof(header),1,out)){
 		return WRITE_ERROR;
 	}
@@ -67,9 +66,8 @@ enum write_status to_bmp(FILE *out, const struct image *img){
 	for(int i = 0; i < header.biHeight;i++){
 		if(1 != fwrite(img->data + i*header.biWidth, header.biWidth*sizeof(struct pixel), 1, out))
 			return WRITE_ERROR;
-
 		// Учитывая выравнивние. Записываем какой угодно остаток байт
-                fwrite(img->data,header.biWidth%BMP_PADDING,1,out);
+				fwrite(img->data,(BMP_PADDING-header.biWidth%BMP_PADDING) %BMP_PADDING, 1, out);
 	}
 
 	return WRITE_OK;

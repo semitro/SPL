@@ -32,12 +32,21 @@ int main(int argc, char** argv)
 	t[0] = malloc(sizeof(transform)*2);
 	t[1] = malloc(sizeof(transform)*2);
 
-	t[0][0] =  1.f;
-	t[1][0] =  0.f;
-	t[0][1] =  1.f;
-	t[1][1] =  1.f;
+	t[0][0] =  0.f;
+	t[1][0] =  1.f;
+	t[0][1] =  -1.f;
+	t[1][1] =  0.f;
+//		t[0][0] =  1.f;
+//		t[1][0] =  0.f;
+//		t[0][1] =  0.f;
+//		t[1][1] =  1.f;
 
-		if( to_bmp(fopen("out.bmp", "wb"), apply_transform(&img,t,0,0)) == WRITE_OK){
+//		t[0][0] =  0.017452406;
+//		t[1][0] =  0.999847695;
+//		t[0][1] = -0.999847695;
+//		t[1][1] =  0.017452406;
+		void *p = apply_transform(&img,t,0,0);
+		if( to_bmp(fopen("out.bmp", "wb"), p) == WRITE_OK){
 		puts("The file has been stored!");
 	}
 
