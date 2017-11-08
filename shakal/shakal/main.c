@@ -34,7 +34,7 @@ int main(int argc, char** argv)
 		}
 		case READ_INVALID_SIGNATURE:{
 			puts("The file doesn't have bmp magic-number");
-			puts("Are you sure that the file is .bmp?");
+			puts("Are you sure that this is the bmp-file?");
 			break;
 		}
 		case READ_INVALID_BITS:
@@ -51,26 +51,30 @@ int main(int argc, char** argv)
 	t[0] = malloc(sizeof(transform)*2);
 	t[1] = malloc(sizeof(transform)*2);
 
-	t[0][0] =  0.f;
-	t[1][0] =  1.f;
-	t[0][1] =  -1.f;
-	t[1][1] =  0.f;
-//		t[0][0] =  1.f;
-//		t[1][0] =  0.f;
-//		t[0][1] =  0.f;
-//		t[1][1] =  1.f;
+		t[0][0] =  0.f;
+		t[1][0] =  1.f;
+		t[0][1] =  -1.f;
+		t[1][1] =  0.f;
+	//		t[0][0] =  1.f;
+	//		t[1][0] =  0.f;
+	//		t[0][1] =  0.f;
+	//		t[1][1] =  1.f;
 
-//		t[0][0] =  0.017452406;
-//		t[1][0] =  0.999847695;
-//		t[0][1] = -0.999847695;
-//		t[1][1] =  0.017452406;
-		void *p = apply_transform(&img,t,0,0);
-		if( to_bmp(fopen("out.bmp", "wb"), p) == WRITE_OK){
-		puts("The file has been stored!");
-	}
+//                t[0][0] =  0.f;
+//                t[1][0] =  2.f;
+//                t[0][1] =  -1.f;
+//                t[1][1] =  0.f;
+//        t[0][0] =  0.707106781;
+//        t[1][0] =  0.707106781;
+//        t[0][1] = -0.707106781;
+//        t[1][1] =  0.707106781;
+        void *p = apply_transform(&img,t,0,0);
+        if( to_bmp(fopen("out.bmp", "wb"), p) == WRITE_OK)
+            puts("The file has been stored!");
+        else
+            puts ("Error with storing the file");
 
-
-	fclose(file);
-	return 0;
+        fclose(file);
+        return 0;
 }
 

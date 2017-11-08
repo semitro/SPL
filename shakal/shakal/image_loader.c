@@ -24,12 +24,10 @@ enum read_status from_bmp(FILE *in, struct image* img){
 	img->height = abs(header.biHeight);
 	img->width  = abs(header.biWidth) ;
     img->data = malloc(img->width*img->height*sizeof(struct pixel));
-	printf("Inital w = %d\n",img->width);
-	printf("Inital h = %d\n",img->height);
 
     // for padding, skipping
     char empty[3];
-    for(int i = 0; i < header.biHeight;i++){
+    for(unsigned int i = 0; i < header.biHeight;i++){
         if(1 != fread(img->data + img->width*i, img->width*sizeof(struct pixel), 1, in) ){
             return READ_INVALID_BITS;
         }
@@ -59,7 +57,7 @@ enum write_status to_bmp(FILE *out, const struct image *img){
         return WRITE_ERROR;
     }
 
-    for(int i = 0; i < header.biHeight;i++){
+    for(unsigned int i = 0; i < header.biHeight;i++){
         if(1 != fwrite(img->data + i*header.biWidth, header.biWidth*sizeof(struct pixel), 1, out))
             return WRITE_ERROR;
         // Учитывая выравнивние. Записываем какой угодно остаток байт
