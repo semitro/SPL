@@ -1,4 +1,5 @@
 #include "transform.h"
+int a[10];
 
 struct image* apply_transform(struct image *img, transform **t, int originX, int originY){
 
@@ -24,7 +25,7 @@ struct image* apply_transform(struct image *img, transform **t, int originX, int
 	printf("Height: %d\n", img->height );
 	printf("Width : %d\n", new_img->width );
 	printf("Height: %d\n", new_img->height );
-
+	int a[5];
 	originX = MIN(0,MIN(top_x, right_x));
 	originY = MIN(0,MIN(top_y, right_y));
 
