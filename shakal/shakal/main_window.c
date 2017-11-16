@@ -8,13 +8,21 @@ static image* _img;
 static void draw_thread(image *img);
 static void redraw();
 
+static u_int32_t _slider_point;
+
 static void draw_slider(){
-	XSetForeground(dis,gc,55555);
-	XDrawLine(dis,win,gc,0,0,100,100);
+	XWindowAttributes attr;
+	XGetWindowAttributes(dis, win, &attr);
+	XSetForeground(dis,gc,WhitePixel(dis,screen));
+	XDrawLine(dis ,win, gc, 0, attr.height - BOTTOM_SLIDER_ALIGN, attr.width, attr.height - BOTTOM_SLIDER_ALIGN);
+	XDrawArc(dis, win, gc, _slider_point,  attr.height - BOTTOM_SLIDER_ALIGN - SLIDER_POINT_WIDE/2, SLIDER_POINT_WIDE,
+			 SLIDER_POINT_WIDE, 0, 360*64 );
+
 	XFlush(dis);
 }
-static void set_slider_point(float x){
-
+static void set_slider_point(u_int32_t x){
+	//XDraw
+	_slider_point = x;
 }
 
 void main_loop(){
@@ -27,19 +35,18 @@ void main_loop(){
 		//
 
         // Ужасно, один процессор загружается на полную,
-        // но иначе XNextEvent блкирует dis, и я не могу рисовать
-        while(XPending(dis)){
+		// но иначе XNextEvent блкирует dis, и я не могу рисовать
+		while(XPending(dis)){
             XNextEvent(dis, &e);
 			switch (e.type) {
 			case Expose:
 				draw_slider();
 				redraw();
-				puts("x");
 				break;
 			default:
 				break;
 			}
-        }
+		}
     }
 }
 
@@ -102,9 +109,7 @@ static void draw_thread(struct image *img){
 
 
     while(1){
-		puts("lock");
         pthread_mutex_lock(&_draw_again);
-		puts("))");
 
         for(u_int i = 0; i < img->height; i++)
             for(u_int j = 0; j < img->width; j++){
@@ -116,7 +121,8 @@ static void draw_thread(struct image *img){
                 XAllocColor(dis, _colormap, &color);
 
                 XSetForeground(dis, gc, color.pixel);
-                XDrawPoint(dis, win, gc, j, img->height - i);
+				XDrawPoint(dis, win, gc, j, img->height - i);
+
             }
 
     }
@@ -125,7 +131,6 @@ static void draw_thread(struct image *img){
 static void redraw(){
 	// Разрешить циклу потока перерисовки сделать ещё одну итерацию
 	pthread_mutex_unlock(&_draw_again);
-	puts("Unlock!");
 }
 
 void set_img(struct image *img){

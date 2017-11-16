@@ -12,6 +12,8 @@
 
 #define MAX_X_COLOR_NUMBER 65535
 #define MAX_IMG_PIXEL_COLOR_NUMBER 255
+#define BOTTOM_SLIDER_ALIGN 15
+#define SLIDER_POINT_WIDE	12
 Display *dis;
 int screen;
 Window win;
