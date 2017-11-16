@@ -21,6 +21,7 @@ HEADERS += \
 
 
 QMAKE_CFLAGS += -Wall -Wextra -std=gnu99 -pedantic
+QMAKE_LFLAGS += -pthread
 LIBS += -lX11
 
 QMAKE_CC = gcc

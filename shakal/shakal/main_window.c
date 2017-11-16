@@ -1,17 +1,62 @@
 #include "main_window.h"
 
-void window_go(){
-	dis = XOpenDisplay((char*)0);
-	screen = DefaultScreen(dis);
-	unsigned long black=BlackPixel(dis,screen);	/* get color black */
-	unsigned long white=WhitePixel(dis, screen);  /* get color white */
+static Colormap _colormap;
+static pthread_t _draw_thread;
+static pthread_mutex_t _draw_again;
+static image* _img;
 
+static void draw_thread(image *img);
+static void redraw();
+
+static void draw_slider(){
+	XSetForeground(dis,gc,55555);
+	XDrawLine(dis,win,gc,0,0,100,100);
+	XFlush(dis);
+}
+static void set_slider_point(float x){
+
+}
+
+void main_loop(){
+
+    XEvent e;
+
+	draw_slider();
+	//redraw();
+    for(;;) {
+		//
+
+        // Ужасно, один процессор загружается на полную,
+        // но иначе XNextEvent блкирует dis, и я не могу рисовать
+        while(XPending(dis)){
+            XNextEvent(dis, &e);
+			switch (e.type) {
+			case Expose:
+				draw_slider();
+				redraw();
+				puts("x");
+				break;
+			default:
+				break;
+			}
+        }
+    }
+}
+
+void start_GUI(){
+	XInitThreads();
+	dis = XOpenDisplay((char*)0);
+
+	screen = DefaultScreen(dis);
+	unsigned long black=BlackPixel(dis,screen);	  /* get color black */
+	unsigned long white=WhitePixel(dis, screen);  /* get color white */
 	win = XCreateSimpleWindow(dis,DefaultRootWindow(dis), 0, 0, 200, 300, 5, black,black );
+
 	/* here is where some properties of the window can be set.
-		   The third and fourth items indicate the name which appears
-		   at the top of the window and the name of the minimized window
-		   respectively.
-		*/
+			   The third and fourth items indicate the name which appears
+			   at the top of the window and the name of the minimized window
+			   respectively.
+			*/
 	XSetStandardProperties(dis,win,"My Window","HI!",None,NULL,0,NULL);
 
 	/* this routine determines which types of input are allowed in
@@ -29,33 +74,63 @@ void window_go(){
 	XSetForeground(dis,gc,white);
 
 	// max - from zero to max
-        Colormap colormap= XDefaultColormap(dis,screen);
-        //XStandardColormap color_map = *XAllocStandardColormap();
+	_colormap = XDefaultColormap(dis,screen);
+	//XStandardColormap color_map = *XAllocStandardColormap();
 
-	XMapWindow  (dis, win);
-
-	for(;;) {
-		XEvent e;
-		XNextEvent(dis, &e);
-		if (e.type == MapNotify)
-			break;
-	}
-	/* clear the window and bring it on top of the other windows */
-	XColor color;
-		color.blue = 65524;
-	color.green = 54;
-		color.red = 655;
-	color.flags = DoBlue | DoRed | DoGreen;
-	XAllocColor(dis, colormap, &color);
-
-        XSetForeground(dis, gc, color.pixel);
-
-
-			XDrawLine(dis,win,gc,0,0,10000,10000);
-
+	XMapWindow(dis, win);
 	XFlush(dis);
+	// Подготовка потока перерисовки img
+	pthread_mutex_init(&_draw_again, NULL);
+	pthread_mutex_lock(&_draw_again);
+	pthread_create(&_draw_thread, NULL, &draw_thread, _img);
+	main_loop();
+}
 
-	sleep(4);
-        XFreeGC(dis, gc);
+XColor my_pixel_to_x(struct pixel my_color){
+        XColor color;
+        color.red   = MAX_X_COLOR_NUMBER*my_color.r/MAX_IMG_PIXEL_COLOR_NUMBER;
+        color.green = MAX_X_COLOR_NUMBER*my_color.g/MAX_IMG_PIXEL_COLOR_NUMBER;
+        color.blue  = MAX_X_COLOR_NUMBER*my_color.b/MAX_IMG_PIXEL_COLOR_NUMBER;
+        return color;
+}
+
+static void draw_thread(struct image *img){
+    XColor color;
+
+    struct pixel my_pixel;
+    color.flags = DoBlue | DoRed | DoGreen;
+
+
+    while(1){
+		puts("lock");
+        pthread_mutex_lock(&_draw_again);
+		puts("))");
+
+        for(u_int i = 0; i < img->height; i++)
+            for(u_int j = 0; j < img->width; j++){
+                my_pixel = img->data[img->width*i + j];
+
+                color = my_pixel_to_x(my_pixel);
+
+                //XQueryColor(dis, colormap, &color);
+                XAllocColor(dis, _colormap, &color);
+
+                XSetForeground(dis, gc, color.pixel);
+                XDrawPoint(dis, win, gc, j, img->height - i);
+            }
+
+    }
 
 }
+static void redraw(){
+	// Разрешить циклу потока перерисовки сделать ещё одну итерацию
+	pthread_mutex_unlock(&_draw_again);
+	puts("Unlock!");
+}
+
+void set_img(struct image *img){
+	//draw_thread(img);
+	_img = img;
+}
+
+

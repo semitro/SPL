@@ -13,42 +13,43 @@
 int main(int argc, char** argv)
 {
 
-	window_go();
-//	if(argc != 2){
-//		puts("Usage: filename");
-//		exit(EXIT_SUCCESS);
-//	}
-//	FILE* file = fopen(argv[1],"rb");
+	if(argc != 2){
+		puts("Usage: filename");
+		exit(EXIT_SUCCESS);
+	}
+	FILE* file = fopen(argv[1],"rb");
 
-//	if(!file){
-//		puts("Error with opening the file");
-//		exit(EXIT_FAILURE);
-//	}
+	if(!file){
+		puts("Error with opening the file");
+		exit(EXIT_FAILURE);
+	}
 
-//	struct image img;
-//	enum read_status read_stat = from_bmp(file, &img);
-//	if(read_stat == READ_OK )
-//		puts("The file has been loaded!");
-//	else{
-//		switch(read_stat){
-//		case READ_INVALID_HEADER:{
-//			puts("The file has invalid header");
-//			break;
-//		}
-//		case READ_INVALID_SIGNATURE:{
-//			puts("The file doesn't have bmp magic-number");
-//			puts("Are you sure that this is the bmp-file?");
-//			break;
-//		}
-//		case READ_INVALID_BITS:
-//		default:
-//			puts("Something is wrong with the file");
+	struct image img;
+	enum read_status read_stat = from_bmp(file, &img);
 
-//		}
-//		exit(0);
-//	}
+	if(read_stat == READ_OK )
+		puts("The file has been loaded!");
+	else{
+		switch(read_stat){
+		case READ_INVALID_HEADER:{
+			puts("The file has invalid header");
+			break;
+		}
+		case READ_INVALID_SIGNATURE:{
+			puts("The file doesn't have bmp magic-number");
+			puts("Are you sure that this is the bmp-file?");
+			break;
+		}
+		case READ_INVALID_BITS:
+		default:
+			puts("Something is wrong with the file");
 
+		}
+		exit(0);
+	}
 
+	set_img(&img);
+	start_GUI();
 //	transform** t;
 //	t    = malloc(sizeof(transform*)*2);
 //	t[0] = malloc(sizeof(transform)*2);
