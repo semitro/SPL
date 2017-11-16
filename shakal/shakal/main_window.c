@@ -22,13 +22,13 @@ static void draw_slider(){
 	XSetForeground(dis,slider_gc,WhitePixel(dis,screen));
 
 	XDrawLine(dis ,win, slider_gc, 0, attr.height - BOTTOM_SLIDER_ALIGN, attr.width, attr.height - BOTTOM_SLIDER_ALIGN);
-	XDrawArc (dis, win, slider_gc, _slider_point/SLIDER_MAX*attr.width,  attr.height - BOTTOM_SLIDER_ALIGN - SLIDER_POINT_WIDE/2, SLIDER_POINT_WIDE,
+	XDrawArc (dis, win, slider_gc, _slider_point/SLIDER_MAX*(attr.width-SLIDER_POINT_WIDE),  attr.height - BOTTOM_SLIDER_ALIGN - SLIDER_POINT_WIDE/2, SLIDER_POINT_WIDE-1,
 			 SLIDER_POINT_WIDE, 0, 360*64 );
-
 }
 
 static void set_slider_point(u_int32_t x){
-	_slider_point = x/(float)get_window_width() * SLIDER_MAX;
+	_slider_point = x/((float)get_window_width()-SLIDER_POINT_WIDE) * SLIDER_MAX;
+//	printf("%f\n", _slider_point - SLIDER_MAX);
 }
 
 static void handle_motion_event(XMotionEvent motion){
@@ -37,8 +37,8 @@ static void handle_motion_event(XMotionEvent motion){
 	XGetWindowAttributes(dis, win, &attr);
 	if(motion.y < attr.height - BOTTOM_SLIDER_ALIGN - SLIDER_POINT_WIDE/2)
 		return;
-	if(motion.x >= attr.x && motion.x < attr.width + attr.x - SLIDER_POINT_WIDE)
-	set_slider_point(motion.x);
+	if(motion.x >= 0 && motion.x <= attr.width - SLIDER_POINT_WIDE)
+		set_slider_point(motion.x);
 	XClearArea(dis, win, 0,  attr.height - BOTTOM_SLIDER_ALIGN - SLIDER_POINT_WIDE/2, attr.width, attr.height - BOTTOM_SLIDER_ALIGN, 1);
 
 	draw_slider();
@@ -48,8 +48,10 @@ static void handle_release_event(XEvent e){
 	XWindowAttributes attr;
 	XGetWindowAttributes(dis, win, &attr);
 	void* to_free = _img->data;
+	void* to_free_2 = _img;
 	_img = rotate(inital_image,_slider_point);
 	free(to_free);
+	free(to_free_2);
 	XResizeWindow(dis, win, _img->width, _img->height  + BOTTOM_SLIDER_ALIGN + SLIDER_POINT_WIDE);
 	draw_slider();
 }
@@ -58,8 +60,6 @@ void main_loop(){
     XEvent e;
     draw_slider();
     for(;;) {
-        // Ужасно, один процессор загружается на полную,
-        // но иначе XNextEvent блкирует dis, и я не могу рисовать
         while(XPending(dis)){
             XNextEvent(dis, &e);
             switch (e.type) {
@@ -140,23 +140,23 @@ static void draw_thread(){
     struct pixel my_pixel;
 	color.flags = DoBlue | DoRed | DoGreen;
 
-    while(1){
-        pthread_mutex_lock(&_draw_again);
+	while(1){
+		pthread_mutex_lock(&_draw_again);
 
-        for(u_int i = 0; i < _img->height; i++)
-            for(u_int j = 0; j < _img->width; j++){
-                my_pixel = _img->data[_img->width*i + j];
+		for(u_int i = 0; i < _img->height; i++)
+			for(u_int j = 0; j < _img->width; j++){
+				my_pixel = _img->data[_img->width*i + j];
 
-                color = my_pixel_to_x(my_pixel);
+				color = my_pixel_to_x(my_pixel);
 
-                //XQueryColor(dis, colormap, &color);
+				//XQueryColor(dis, colormap, &color);
 				XAllocColor(dis, _colormap, &color); // sooo slooow
-                XSetForeground(dis, gc, color.pixel);
-                XDrawPoint(dis, win, gc, j, _img->height - i);
+				XSetForeground(dis, gc, color.pixel);
+				XDrawPoint(dis, win, gc, j, _img->height - i);
 
-            }
+			}
 
-    }
+	}
 
 }
 static void redraw(){
@@ -166,8 +166,14 @@ static void redraw(){
 
 void set_img(struct image *img){
 	//draw_thread(img);
-	_img = img;
 	inital_image = img;
+
+	_img = malloc(sizeof (struct image) );
+	_img->height =  img->height;
+	_img->width  =  img->width;
+	_img->data = malloc(img->height*img->width*sizeof(struct pixel));
+	memcpy(_img->data, img->data, img->height*img->width*sizeof(struct pixel));
+	inital_image->data = img->data;
 }
 
 
