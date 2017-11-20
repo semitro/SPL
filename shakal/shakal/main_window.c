@@ -58,8 +58,12 @@ static void handle_mouse_release_event(XEvent e){
 }
 
 static void handle_key_release_event(XKeyEvent e){
-	_img = sepia_filter(inital_image);
-
+	#define CHAR_C 54
+    // 'c' - 54
+    // 'a' - 38 's' - 39
+	// printf("%d\n", e.keycode );
+    if(e.keycode == CHAR_C)
+    _img = sepia_filter(inital_image);
 }
 
 void main_loop(){

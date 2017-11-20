@@ -58,8 +58,39 @@ struct image* rotate(struct image *img, float angle){
 	return apply_transform(img, *t, 0, 0);
 
 }
+// Нарочито не соответсвует хедеру
+struct image* apply_pixel_transform(image *img, transform t[3][4]){
+        image* new_img = malloc(sizeof (struct image) );
+        new_img->data  = malloc(img->height*img->width*sizeof(struct pixel));
+        new_img->height = img->height;
+        new_img->width  = img->width ;
+        pixel current_p;
+        pixel new_p;
+        #ifdef USE_SSE
+        //xmm3 - np, t[0][0], t[1][0], t[2][0] mul by b t[0][0]
+        asm("movdqu %0, %%xmm3\n" : :"g"(&t[0]) );
+        //xmm4 - np, t[0][1], t[1][1], t[2][1] mul by g t[0][1]
+        asm("movdqu %0, %%xmm4\n" : :"m"(t[1][0]) );
+        //xmm5 - np, t[0][2], t[1][2], t[2][2] mul by b t[0][2]
+        #endif
+        for(size_t j = 0; j < img->height; j++) // Ширина под высотой увеличивает частоту попадаия в кэш
+                for(size_t i = 0; i < img->width; i++){
+                        current_p = img->data[img->width*j + i];
+                        #ifdef USE_SSE // see SIMD x86
 
-struct image* apply_pixel_transform(image *img, transform t[3][3]){
+                        // xmm0 - t
+                        #else // without USE_SSE
+                        // applying matrix multiplictaion
+                        new_p.r = SAT_ARIFM(current_p.b*t[0][0] + current_p.g*t[0][1] + current_p.r*t[0][2]);
+                        new_p.g = SAT_ARIFM(current_p.b*t[1][0] + current_p.g*t[1][1] + current_p.r*t[1][2]);
+                        new_p.b = SAT_ARIFM(current_p.b*t[2][0] + current_p.g*t[2][1] + current_p.r*t[2][2]);
+                        #endif // USE_SSE
+                        new_img->data[new_img->width*j + i] = new_p;
+                }
+        return new_img;
+}
+
+struct image* apply_pixel_transform_SIMD(image *img, transform t[3][3]){
 	image* new_img = malloc(sizeof (struct image) );
 	new_img->data  = malloc(img->height*img->width*sizeof(struct pixel));
 	new_img->height = img->height;
@@ -67,24 +98,27 @@ struct image* apply_pixel_transform(image *img, transform t[3][3]){
 	pixel current_p;
 	pixel new_p;
 
-	for(size_t j = 0; j < img->height; j++) // Ширина под высотой увеличивает частоту попадаия в кэш
-		for(size_t i = 0; i < img->width; i++){
-			current_p = img->data[img->width*j + i];
-//			 applying matrix multiplictaion
-			new_p.r = SAT_ARIFM(current_p.b*t[0][0] + current_p.g*t[0][1] + current_p.r*t[0][2]);
-			new_p.g = SAT_ARIFM(current_p.b*t[1][0] + current_p.g*t[1][1] + current_p.r*t[1][2]);
-			new_p.b = SAT_ARIFM(current_p.b*t[2][0] + current_p.g*t[2][1] + current_p.r*t[2][2]);
-			new_img->data[new_img->width*j + i] = new_p;
-		}
-	return new_img;
 }
 
-
 struct image* sepia_filter(image* img){
-	static const transform sepia[3][3] =  {
-	 { .393f, .769f, .189f },
-	 { .349f, .686f, .168f },
-	 { .272f, .543f, .131f }
-	};
-	return apply_pixel_transform(img,sepia);
+#ifdef USE_SSE // Поскольку мы знаем заранее, нужно ли использовать SSE, можем заране
+                                // подготовить удобное для команд представление данных
+//	static const transform sepia[3][3] =  {
+//	 { .393f, .769f, .189f },
+//	 { .349f, .686f, .168f },
+//	 { .272f, .543f, .131f }
+//	};
+        static const transform sepia[4][3] =  {
+         { .272f, .349f, .393f, .0f },
+         { .543f, .686f, .769f, .0f },
+         { .131f, .168f, .189f, .0f }
+        };
+#else // No using sse
+        static const transform sepia[3][3] =  {
+         { .393f, .769f, .189f },
+         { .349f, .686f, .168f },
+         { .272f, .543f, .131f }
+        };
+#endif
+        return apply_pixel_transform(img,sepia);
 }
