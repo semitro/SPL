@@ -44,16 +44,22 @@ static void handle_motion_event(XMotionEvent motion){
 	draw_slider();
 }
 
-static void handle_release_event(XEvent e){
+static void handle_mouse_release_event(XEvent e){
 	XWindowAttributes attr;
 	XGetWindowAttributes(dis, win, &attr);
-	void* to_free = _img->data;
+	void* to_free   = _img->data;
 	void* to_free_2 = _img;
-	_img = rotate(inital_image,_slider_point);
+	_img = rotate(inital_image, _slider_point);
+
 	free(to_free);
 	free(to_free_2);
 	XResizeWindow(dis, win, _img->width, _img->height  + BOTTOM_SLIDER_ALIGN + SLIDER_POINT_WIDE);
 	draw_slider();
+}
+
+static void handle_key_release_event(XKeyEvent e){
+	_img = sepia_filter(inital_image);
+
 }
 
 void main_loop(){
@@ -72,9 +78,13 @@ void main_loop(){
             case MotionNotify:
                 handle_motion_event(e.xmotion);
                 break;
-            case ButtonRelease:
-                handle_release_event(e);
+            case KeyRelease:
+                handle_key_release_event(e.xkey);
                 break;
+            case ButtonRelease:
+                handle_mouse_release_event(e);
+                break;
+
             default:
                 break;
             }
@@ -102,7 +112,8 @@ void start_GUI(){
 	/* this routine determines which types of input are allowed in
 	   the input.  see the appropriate section for details...
 	*/
-	XSelectInput(dis, win, StructureNotifyMask | ExposureMask|ButtonPressMask|KeyPressMask|ButtonReleaseMask|Button1MotionMask);
+	XSelectInput(dis, win, StructureNotifyMask |KeyReleaseMask| ExposureMask
+							   |ButtonPressMask|ButtonReleaseMask|Button1MotionMask);
 
 	/* create the Graphics Context */
 	gc=XCreateGC(dis, win, 0, 0);

@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-struct pixel { uint8_t b,g,r; };
+typedef struct pixel { uint8_t b,g,r; }pixel;
 
 typedef struct image {
 	uint64_t width, height;
