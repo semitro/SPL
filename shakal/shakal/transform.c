@@ -66,12 +66,15 @@ struct image* apply_pixel_transform(image *img, transform t[3][4]){
         new_img->width  = img->width ;
         pixel current_p;
         pixel new_p;
-        #ifdef USE_SSE
-        //xmm3 - np, t[0][0], t[1][0], t[2][0] mul by b t[0][0]
-        asm("movdqu %0, %%xmm3\n" : :"g"(&t[0]) );
-        //xmm4 - np, t[0][1], t[1][1], t[2][1] mul by g t[0][1]
-        asm("movdqu %0, %%xmm4\n" : :"m"(t[1][0]) );
-        //xmm5 - np, t[0][2], t[1][2], t[2][2] mul by b t[0][2]
+        #ifdef USE_SSE // This brhanch of code is included if we want to use simd-instruction of x86
+        __long_double_t *p = &t;         // pointer to 128-bit memory location
+        //// load the filter-matrix into
+        asm("movdqu %0, %%xmm3\n" : :"g"(p) ); //xmm3 - t[0][0], t[0][1], t[0][2], ...
+        p++; // now p points to &t[1][0]
+        asm("movdqu %0, %%xmm4\n" : :"g"(p) ); //xmm4 - t[1][0], t[1][1], t[1][2], ...
+        p++; // points to &t[2][0]
+        asm("movdqu %0, %%xmm5\n" : :"g"(p) ); //xmm5 - t[2][0], t[2][1], t[2][2], ...
+
         #endif
         for(size_t j = 0; j < img->height; j++) // Ширина под высотой увеличивает частоту попадаия в кэш
                 for(size_t i = 0; i < img->width; i++){
@@ -101,19 +104,20 @@ struct image* apply_pixel_transform_SIMD(image *img, transform t[3][3]){
 }
 
 struct image* sepia_filter(image* img){
-#ifdef USE_SSE // Поскольку мы знаем заранее, нужно ли использовать SSE, можем заране
-                                // подготовить удобное для команд представление данных
-//	static const transform sepia[3][3] =  {
-//	 { .393f, .769f, .189f },
-//	 { .349f, .686f, .168f },
-//	 { .272f, .543f, .131f }
-//	};
-        static const transform sepia[4][3] =  {
-         { .272f, .349f, .393f, .0f },
-         { .543f, .686f, .769f, .0f },
-         { .131f, .168f, .189f, .0f }
-        };
-#else // No using sse
+#ifdef USE_SSE
+	// Поскольку мы знаем заранее, нужно ли использовать SSE, можем
+	// подготовить удобное для последующих SIMD-команд представление данных
+	//	static const transform sepia[3][3] =  {
+	//	 { .393f, .769f, .189f },
+	//	 { .349f, .686f, .168f },
+	//	 { .272f, .543f, .131f }
+	//	};
+	static const transform sepia[3][4] =  {
+		{ .272f, .349f, .393f, .0f },
+		{ .543f, .686f, .769f, .0f },
+		{ .131f, .168f, .189f, .0f }
+	};
+#else   // No using sse
         static const transform sepia[3][3] =  {
          { .393f, .769f, .189f },
          { .349f, .686f, .168f },
