@@ -69,13 +69,13 @@ struct image* apply_pixel_transform(image *img, const transform t[3][4]){
 
         #ifdef USE_SSE // This brhanch of code is included if we want to use simd-instruction of x86
         float xmm_color[4];
-		__int128_t *p = &t[0][0];
+                __int128_t *p = (__int128_t*)&t[0][0];
 		//// load the filter-matrix into
-		asm("movdqu %0, %%xmm3\n" : :"m"(*p) );    //xmm3 - t[0][0], t[0][1], t[0][2], ...
-		p++; // p = &t[1][0];
-		asm("movdqu %0, %%xmm4\n" : :"m"(*p) ); //xmm4 - t[1][0], t[1][1], t[1][2], ...
+		asm("movups %0, %%xmm3\n" : :"m"(*p) );    //xmm3 - t[0][0], t[0][1], t[0][2], ...
+		p++; // p = &t[1][0];                      // xmm3 - .., t[0][2], t[0][1], t[0][0]
+		asm("movups %0, %%xmm4\n" : :"m"(*p) ); //xmm4 - t[1][0], t[1][1], t[1][2], ...
 		p++; // p = &t[2][0];
-		asm("movdqu %0, %%xmm5\n" : :"m"(*p) ); //xmm5 - t[2][0], t[2][1], t[2][2], ...
+		asm("movups %0, %%xmm5\n" : :"m"(*p) ); //xmm5 - t[2][0], t[2][1], t[2][2], ...
         #endif
         for(size_t j = 0; j < img->height; j++) // The width under the height - much better to cache-hit
             for(size_t i = 0; i < img->width; i++){
@@ -85,31 +85,28 @@ struct image* apply_pixel_transform(image *img, const transform t[3][4]){
 				xmm_color[0] = (float)current_p.b; // we can't just move current_p into xmm
 				xmm_color[1] = (float)current_p.g; // because it keeps int8_t values
 				xmm_color[2] = (float)current_p.r;
-				xmm_color[0] = 0.f;
-				xmm_color[3] = (float)current_p.b;
-				xmm_color[2] = (float)current_p.g;
-				xmm_color[1] = (float)current_p.r;
-				asm("movdqu %0,      %%xmm0\n" : : "m"(*xmm_color)); // now the current_p
-				asm("movdqa %xmm0,   %xmm1\n");                    // in xmm0, xmm1 and xmm2
-				asm("movdqa %xmm0,   %xmm2\n");
+
+				asm("movups %0,      %%xmm0\n" : : "m"(*xmm_color)); // now the current_p
+				asm("movaps %xmm0,   %xmm1\n");                    // in xmm0, xmm1 and xmm2
+				asm("movaps %xmm0,   %xmm2\n");
                 // the calculations
 				asm(
 				"mulps  %xmm3, %xmm0\n" // xmm0 *= xmm3; de facto, calculate b*t00, b*t01, b*t20
 				"mulps  %xmm4, %xmm1\n" // xmm1 *= xmm4;
 				"mulps  %xmm5, %xmm2\n" // xmm5 *= xmm2;
 
-				"addps  %xmm0, %xmm2\n"
-				"addps  %xmm1, %xmm2\n"
+				"addps  %xmm1, %xmm0\n"
+				"addps  %xmm2, %xmm0\n"
 
 				); // Not xm00 contains new b-g-r pixel color. Every color is float
                 // epilog, new pixel <- registers
 
-				asm("movdqu %%xmm2, %0" :"=m"(xmm_color): );
-				new_p.b = xmm_color[0];
-				new_p.g = xmm_color[1];
-				new_p.r = xmm_color[2];
+				asm("movaps %%xmm0, %0" :"=m"(*xmm_color): );
+				new_p.b = SAT_ARIFM(xmm_color[2]);
+				new_p.g = SAT_ARIFM(xmm_color[1]);
+				new_p.r = SAT_ARIFM(xmm_color[0]);
 
-                #else // without USE_SSE
+				#else // without USE_SSE
                 // applying matrix multiplictaion
                 new_p.r = SAT_ARIFM(current_p.b*t[0][0] + current_p.g*t[0][1] + current_p.r*t[0][2]);
                 new_p.g = SAT_ARIFM(current_p.b*t[1][0] + current_p.g*t[1][1] + current_p.r*t[1][2]);
@@ -118,6 +115,36 @@ struct image* apply_pixel_transform(image *img, const transform t[3][4]){
                 new_img->data[new_img->width*j + i] = new_p;
             }
         return new_img;
+}
+
+struct image* sepia_filter(image* img){
+#ifdef USE_SSE
+	// Поскольку мы знаем заранее, нужно ли использовать SSE, можем
+	// подготовить удобное для последующих SIMD-команд представление данных
+
+//	static const transform sepia[3][4] =  {
+//		{ .272f, .349f, .393f, 0.f },
+//		{ .543f, .686f, .769f, 0.f },
+//		{ .131f, .168f, .189f, 0.f }
+//	};
+	static const transform sepia[3][4] =  {
+		{ .393f, .769f, .189f, 0.f },
+		{ .349f, .686f, .168f, 0.f },
+		{ .272f, .543f, .131f, 0.f }
+	};
+//	static const transform sepia[3][4] =  {
+//		{ .0f, .0f, .0f, .0f },
+//		{ .0f, .0f, .0f, .0f },
+//		{ .0f, .0f, .0f, .0f }
+//	};
+#else   // No using sse
+		static const transform sepia[3][4] =  {
+		 { .393f, .769f, .189f },
+		 { .349f, .686f, .168f },
+		 { .272f, .543f, .131f }
+		};
+#endif
+		return apply_pixel_transform(img,sepia);
 }
 
 //struct image* apply_pixel_transform_SIMD(image *img, transform t[3][3]){
@@ -130,27 +157,3 @@ struct image* apply_pixel_transform(image *img, const transform t[3][4]){
 
 //}
 
-struct image* sepia_filter(image* img){
-#ifdef USE_SSE
-	// Поскольку мы знаем заранее, нужно ли использовать SSE, можем
-	// подготовить удобное для последующих SIMD-команд представление данных
-
-	static const transform sepia[3][4] =  {
-		{ .272f, .349f, .393f, .0f },
-		{ .543f, .686f, .769f, .0f },
-		{ .131f, .168f, .189f, .0f }
-	};
-//	static const transform sepia[3][4] =  {
-//		{ .0f, .0f, .0f, .0f },
-//		{ .0f, .0f, .0f, .0f },
-//		{ .0f, .0f, .0f, .0f }
-//	};
-#else   // No using sse
-		static const transform sepia[3][4] =  {
-         { .393f, .769f, .189f },
-         { .349f, .686f, .168f },
-		 { .272f, .543f, .131f }
-        };
-#endif
-        return apply_pixel_transform(img,sepia);
-}
