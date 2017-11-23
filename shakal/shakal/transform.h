@@ -7,13 +7,18 @@
 
 #include "image.h"
 
+// Использовать ли SSE-инструкции?
+#define USE_SSE
+
+#ifdef USE_SSE
+#include <mmintrin.h>
+#endif
+
+
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
 // "Насыщенна арифметика" - результаты больше 255 приравниваются к 255
 #define SAT_ARIFM(a) (a <= 255 ? a : 255)
-
-// Использовать ли SSE-инструкции?
-#define USE_SSE
 //#undef USE_SSE
 typedef float transform;
 // Применение трансформации непосредственно к расположению пикселей

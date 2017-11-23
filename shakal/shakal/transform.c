@@ -60,61 +60,70 @@ struct image* rotate(struct image *img, float angle){
 }
 // Нарочито не соответсвует хедеру
 struct image* apply_pixel_transform(image *img, const transform t[3][4]){
-        image* new_img = malloc(sizeof (struct image) );
-        new_img->data  = malloc(img->height*img->width*sizeof(struct pixel));
-        new_img->height = img->height;
-        new_img->width  = img->width ;
-        pixel current_p;
-        pixel new_p;
+    image* new_img = malloc(sizeof (struct image) );
+    new_img->data  = malloc(img->height*img->width*sizeof(struct pixel));
+    new_img->height = img->height;
+    new_img->width  = img->width ;
+    pixel current_p;
+    pixel new_p;
 
-        #ifdef USE_SSE // This brhanch of code is included if we want to use simd-instruction of x86
-        float xmm_color[4];
-                __int128_t *p = (__int128_t*)&t[0][0];
-		//// load the filter-matrix into
-		asm("movups %0, %%xmm3\n" : :"m"(*p) );    //xmm3 - t[0][0], t[0][1], t[0][2], ...
-		p++; // p = &t[1][0];                      // xmm3 - .., t[0][2], t[0][1], t[0][0]
-		asm("movups %0, %%xmm4\n" : :"m"(*p) ); //xmm4 - t[1][0], t[1][1], t[1][2], ...
-		p++; // p = &t[2][0];
-		asm("movups %0, %%xmm5\n" : :"m"(*p) ); //xmm5 - t[2][0], t[2][1], t[2][2], ...
-        #endif
-        for(size_t j = 0; j < img->height; j++) // The width under the height - much better to cache-hit
-            for(size_t i = 0; i < img->width; i++){
-                current_p = img->data[img->width*j + i];
-                #ifdef USE_SSE // see SIMD x86
-				// epilog, preparing the xmm registers. xmm <- pixel
-				xmm_color[0] = (float)current_p.b; // we can't just move current_p into xmm
-				xmm_color[1] = (float)current_p.g; // because it keeps int8_t values
-				xmm_color[2] = (float)current_p.r;
+#ifdef USE_SSE // This brhanch of code is included if we want to use simd-instruction of x86
+    float xmm_color[4];
+    float *f;
+    __int128_t *p = (__int128_t*)&t[0][0];
+    //// load the filter-matrix into
+    asm("movups %0, %%xmm3\n" : :"m"(*p) );    //xmm3 - t[0][0], t[0][1], t[0][2], ...
+    p++; // p = &t[1][0];                      // xmm3 - .., t[0][2], t[0][1], t[0][0]
+    asm("movups %0, %%xmm4\n" : :"m"(*p) ); //xmm4 - t[1][0], t[1][1], t[1][2], ...
+    p++; // p = &t[2][0];
+    asm("movups %0, %%xmm5\n" : :"m"(*p) ); //xmm5 - t[2][0], t[2][1], t[2][2], ...
+#endif
+    for(size_t j = 0; j < img->height; j++) // The width under the height - much better to cache-hit
+        for(size_t i = 0; i < img->width; i++){
+            current_p = img->data[img->width*j + i];
 
-				asm("movups %0,      %%xmm0\n" : : "m"(*xmm_color)); // now the current_p
-				asm("movaps %xmm0,   %xmm1\n");                    // in xmm0, xmm1 and xmm2
-				asm("movaps %xmm0,   %xmm2\n");
-                // the calculations
-				asm(
-				"mulps  %xmm3, %xmm0\n" // xmm0 *= xmm3; de facto, calculate b*t00, b*t01, b*t20
-				"mulps  %xmm4, %xmm1\n" // xmm1 *= xmm4;
-				"mulps  %xmm5, %xmm2\n" // xmm5 *= xmm2;
+#ifdef USE_SSE // see SIMD x86
+            // epilog, preparing the xmm registers. xmm <- pixel
+            xmm_color[0] = (float)current_p.b; // we can't just move current_p into xmm
+            xmm_color[1] = (float)current_p.g; // because it keeps int8_t values
+            xmm_color[2] = (float)current_p.r;
 
-				"addps  %xmm1, %xmm0\n"
-				"addps  %xmm2, %xmm0\n"
+            f = (float*)&xmm_color;
+            asm("movups %0,      %%xmm0\n" : : "m"(*f)); // now the current_p
+            asm("shufps $0,%xmm0,%xmm0\n");  // populate by the least significant element
+            f++;
+            asm("movups %0, %%xmm1\n" : : "m"(*f));     // in xmm0, xmm1 and xmm2
+            asm("shufps $0,%xmm1,%xmm1\n");
+            f++;
+            asm("movups %0,   %%xmm2\n" : :"m"(*f));
+            asm("shufps $0,%xmm2,%xmm2\n");
 
-				); // Not xm00 contains new b-g-r pixel color. Every color is float
-                // epilog, new pixel <- registers
+            // the calculations
+            asm(
+            "mulps  %xmm3, %xmm0\n" // xmm0 *= xmm3; de facto, calculate b*t00, b*t01, b*t20
+            "mulps  %xmm4, %xmm1\n" // xmm1 *= xmm4;
+            "mulps  %xmm5, %xmm2\n" // xmm5 *= xmm2;
 
-				asm("movaps %%xmm0, %0" :"=m"(*xmm_color): );
-				new_p.b = SAT_ARIFM(xmm_color[2]);
-				new_p.g = SAT_ARIFM(xmm_color[1]);
-				new_p.r = SAT_ARIFM(xmm_color[0]);
+            "addps  %xmm1, %xmm0\n"
+            "addps  %xmm2, %xmm0\n"
 
-				#else // without USE_SSE
-                // applying matrix multiplictaion
-                new_p.r = SAT_ARIFM(current_p.b*t[0][0] + current_p.g*t[0][1] + current_p.r*t[0][2]);
-                new_p.g = SAT_ARIFM(current_p.b*t[1][0] + current_p.g*t[1][1] + current_p.r*t[1][2]);
-                new_p.b = SAT_ARIFM(current_p.b*t[2][0] + current_p.g*t[2][1] + current_p.r*t[2][2]);
-                #endif // USE_SSE
-                new_img->data[new_img->width*j + i] = new_p;
-            }
-        return new_img;
+            ); // Not xm00 contains new b-g-r pixel color. Every color is float
+            // epilog, new pixel <- registers
+
+            asm("movaps %%xmm0, %0" :"=m"(*xmm_color): );
+            new_p.b = SAT_ARIFM(xmm_color[0]);
+            new_p.g = SAT_ARIFM(xmm_color[1]);
+            new_p.r = SAT_ARIFM(xmm_color[2]);
+
+#else // without USE_SSE
+            // applying matrix multiplictaion
+            new_p.r = SAT_ARIFM(current_p.b*t[0][0] + current_p.g*t[0][1] + current_p.r*t[0][2]);
+            new_p.g = SAT_ARIFM(current_p.b*t[1][0] + current_p.g*t[1][1] + current_p.r*t[1][2]);
+            new_p.b = SAT_ARIFM(current_p.b*t[2][0] + current_p.g*t[2][1] + current_p.r*t[2][2]);
+#endif // USE_SSE
+            new_img->data[new_img->width*j + i] = new_p;
+        }
+    return new_img;
 }
 
 struct image* sepia_filter(image* img){
@@ -122,16 +131,16 @@ struct image* sepia_filter(image* img){
 	// Поскольку мы знаем заранее, нужно ли использовать SSE, можем
 	// подготовить удобное для последующих SIMD-команд представление данных
 
-//	static const transform sepia[3][4] =  {
-//		{ .272f, .349f, .393f, 0.f },
-//		{ .543f, .686f, .769f, 0.f },
-//		{ .131f, .168f, .189f, 0.f }
-//	};
 	static const transform sepia[3][4] =  {
-		{ .393f, .769f, .189f, 0.f },
-		{ .349f, .686f, .168f, 0.f },
-		{ .272f, .543f, .131f, 0.f }
+		{ .272f, .349f, .393f, 0.f },
+		{ .543f, .686f, .769f, 0.f },
+		{ .131f, .168f, .189f, 0.f }
 	};
+//	static const transform sepia[3][4] =  {
+//		{ .393f, .769f, .189f, 0.f },
+//		{ .349f, .686f, .168f, 0.f },
+//		{ .272f, .543f, .131f, 0.f }
+//	};
 //	static const transform sepia[3][4] =  {
 //		{ .0f, .0f, .0f, .0f },
 //		{ .0f, .0f, .0f, .0f },
