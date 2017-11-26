@@ -53,17 +53,22 @@ static void handle_mouse_release_event(XEvent e){
 
 	free(to_free);
 	free(to_free_2);
-	XResizeWindow(dis, win, _img->width, _img->height  + BOTTOM_SLIDER_ALIGN + SLIDER_POINT_WIDE);
+	XResizeWindow(dis, win, _img->width > 10 ? _img->width : 10, _img->height  + BOTTOM_SLIDER_ALIGN + SLIDER_POINT_WIDE);
 	draw_slider();
 }
 
 static void handle_key_release_event(XKeyEvent e){
 	#define CHAR_C 54
-    // 'c' - 54
-    // 'a' - 38 's' - 39
+	// 'c' - 54
+	// 'a' - 38 's' - 39
 	// printf("%d\n", e.keycode );
-    if(e.keycode == CHAR_C)
-    _img = sepia_filter(inital_image);
+	if(e.keycode == CHAR_C){
+		void* to_free   = _img->data;
+		void* to_free_2 = _img;
+		_img = sepia_filter(_img);
+		free(to_free);
+		free(to_free_2);
+	}
 }
 
 void main_loop(){

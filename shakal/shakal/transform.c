@@ -2,7 +2,9 @@
 
 struct image* apply_transform(struct image *img, transform t[2][2], int32_t originX, int32_t originY){
 
+
 	struct image* new_img = malloc(sizeof(struct image));
+
 
 	// Применяем трансформацию для крайних правого и верхнего пикелей
 	// Чтобы изменить размер получаемого изображения
@@ -22,8 +24,13 @@ struct image* apply_transform(struct image *img, transform t[2][2], int32_t orig
 	new_img->width   = MAX(abs(right_top_x),   abs(right_x - top_x));
 	new_img->height  = MAX(abs(right_y-top_y), abs(right_top_y    ));
 
-        new_img->data = malloc(new_img->height*new_img->width*sizeof(struct pixel));
-
+	new_img->data = malloc(new_img->height*new_img->width*sizeof(struct pixel));
+	if(img->width  == 1 && img->height == 1){
+			memcpy(img->data,new_img->data,2);
+			new_img->height = 1;
+			new_img->width  = 1;
+			return new_img;
+		}
 //	originX = fmin(fmin(top_x, right_x),  right_top_x);
 	originX = MIN(MIN(top_x, right_x), right_top_x);
 	if(originX > 0)
@@ -58,7 +65,7 @@ struct image* rotate(struct image *img, float angle){
 	return apply_transform(img, *t, 0, 0);
 
 }
-// Нарочито не соответсвует хедеру
+#define R 16
 struct image* apply_pixel_transform(image *img, const transform t[3][4]){
     image* new_img = malloc(sizeof (struct image) );
     new_img->data  = malloc(img->height*img->width*sizeof(struct pixel));
@@ -78,8 +85,8 @@ struct image* apply_pixel_transform(image *img, const transform t[3][4]){
     p++; // p = &t[2][0];
     asm("movups %0, %%xmm5\n" : :"m"(*p) ); //xmm5 - t[2][0], t[2][1], t[2][2], ...
 #endif
-    for(size_t j = 0; j < img->height; j++) // The width under the height - much better to cache-hit
-        for(size_t i = 0; i < img->width; i++){
+	for(size_t j = 0; j < img->height; j++) // The width under the height - much better to cache-hit
+		for(size_t i = 0; i < img->width; i++){
             current_p = img->data[img->width*j + i];
 
 #ifdef USE_SSE // see SIMD x86
@@ -89,13 +96,13 @@ struct image* apply_pixel_transform(image *img, const transform t[3][4]){
             xmm_color[2] = (float)current_p.r;
 
             f = (float*)&xmm_color;
-            asm("movups %0,      %%xmm0\n" : : "m"(*f)); // now the current_p
+			asm("movups %0,      %%xmm0\n" : : "m"(*f)); // now the current_p
             asm("shufps $0,%xmm0,%xmm0\n");  // populate by the least significant element
-            f++;
-            asm("movups %0, %%xmm1\n" : : "m"(*f));     // in xmm0, xmm1 and xmm2
+			f++;
+			asm("movups %0, %%xmm1\n" : : "m"(*f));     // in xmm0, xmm1 and xmm2
             asm("shufps $0,%xmm1,%xmm1\n");
-            f++;
-            asm("movups %0,   %%xmm2\n" : :"m"(*f));
+			f++;
+			asm("movups %0,   %%xmm2\n" : :"m"(*f));
             asm("shufps $0,%xmm2,%xmm2\n");
 
             // the calculations
@@ -104,8 +111,9 @@ struct image* apply_pixel_transform(image *img, const transform t[3][4]){
             "mulps  %xmm4, %xmm1\n" // xmm1 *= xmm4;
             "mulps  %xmm5, %xmm2\n" // xmm5 *= xmm2;
 
-            "addps  %xmm1, %xmm0\n"
+			"addps  %xmm1, %xmm0\n"
             "addps  %xmm2, %xmm0\n"
+
 
             ); // Not xm00 contains new b-g-r pixel color. Every color is float
             // epilog, new pixel <- registers
@@ -130,22 +138,11 @@ struct image* sepia_filter(image* img){
 #ifdef USE_SSE
 	// Поскольку мы знаем заранее, нужно ли использовать SSE, можем
 	// подготовить удобное для последующих SIMD-команд представление данных
-
 	static const transform sepia[3][4] =  {
 		{ .272f, .349f, .393f, 0.f },
-		{ .543f, .686f, .769f, 0.f },
+		{ .543f, .086f, .769f, 0.f },
 		{ .131f, .168f, .189f, 0.f }
 	};
-//	static const transform sepia[3][4] =  {
-//		{ .393f, .769f, .189f, 0.f },
-//		{ .349f, .686f, .168f, 0.f },
-//		{ .272f, .543f, .131f, 0.f }
-//	};
-//	static const transform sepia[3][4] =  {
-//		{ .0f, .0f, .0f, .0f },
-//		{ .0f, .0f, .0f, .0f },
-//		{ .0f, .0f, .0f, .0f }
-//	};
 #else   // No using sse
 		static const transform sepia[3][4] =  {
 		 { .393f, .769f, .189f },
