@@ -6,7 +6,9 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <sys/mman.h>
+#include <unistd.h>
 
+#define DEBUG
 #define  HEAP_START  ((void*)0x04040000)
 struct mem;
 
