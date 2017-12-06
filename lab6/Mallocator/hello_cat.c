@@ -36,9 +36,16 @@ void* meow_lloc(size_t size){
 		if(i->is_free && i->capacity >= real_size){
 			// split it
 			reminder = (void*)i + real_size;
+			printf("\t\t\t%p\n", i);
+
+			printf("\t\t\t%d\n", i->capacity);
+
 			reminder->capacity = i->capacity - real_size;
 
+
+			printf("\t\t\t%d\n", reminder->capacity);
 			i->capacity = size;
+
 
 			reminder->is_free = true;
 			i->is_free = false;
@@ -46,7 +53,7 @@ void* meow_lloc(size_t size){
 			reminder->next = i->next;
 			i->next = reminder;
 
-			return i + sizeof(struct mem);
+			return (void*)i + sizeof(struct mem);
 		}
 
 		if(i->next)
@@ -59,23 +66,41 @@ void* meow_lloc(size_t size){
 	// we need to try to mmap a new region
 	// first, right after the last element
 	#ifdef DEBUG
-	puts("There's no free chunks, trying to make MAP_FIXED mmap");
+	puts("................................................................");
+	puts(".\tThere's no free chunks, trying to make MAP_FIXED mmap");
 	#endif
 	size_t allocated_mem = get_real_size_aligned_by_page(size);
-	printf("%d alloc: ", allocated_mem);
-	struct mem* new_chunk = mmap(i + i->capacity + sizeof(struct mem), allocated_mem,
-								 PROT_EXEC | PROT_READ | PROT_WRITE, MAP_FIXED | MAP_PRIVATE | MAP_ANON, -1, 0);
+	printf(".\t alloc: %lu\n", allocated_mem);
+	struct mem* new_chunk =
+			mmap((void*)i + i->capacity + sizeof(struct mem), allocated_mem,
+				 PROT_EXEC | PROT_READ | PROT_WRITE,
+				 MAP_FIXED | MAP_PRIVATE | MAP_ANONYMOUS , -1, 0);
 
-	if(-1 != new_chunk){
-		#ifdef DEBUG
-		puts("MAP_FIXED allocate succeed");
-		printf("It's addr: %p\n", new_chunk);
-		#endif
+	if(-1 != (long int)new_chunk){
+
 		i->next = new_chunk;
 		new_chunk->next     = NULL;
 		new_chunk->is_free  = true;
-		new_chunk->capacity = allocated_mem;
-		return new_chunk;
+		new_chunk->capacity = allocated_mem - sizeof(struct mem);
+		printf(".new chunk \t%d\n", new_chunk->capacity);
+
+		printf(".new chunk \t%d\n", new_chunk->capacity);
+		printf(".new chunk \t%d\n", new_chunk->capacity);
+		new_chunk ->capacity = new_chunk->capacity;
+		printf(".new chunk \t%d\n", new_chunk->capacity);
+		printf(".new chunk \t%d\n", new_chunk->capacity);
+
+
+		#ifdef DEBUG
+		puts(".\tMAP_FIXED allocate succeed");
+		printf(".\tIt's addr: %p\n", new_chunk);
+		printf(".\tIt's capacity: %d\n", new_chunk->capacity);
+
+		puts("................................................................");
+		#endif
+		printf("new chunk \t%d\n", new_chunk->capacity);
+
+		return (void*)new_chunk +sizeof(struct mem);
 	}
 	// if it is impossible, mmap anywhere
 	return NULL;
