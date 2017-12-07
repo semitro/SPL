@@ -12,14 +12,19 @@ int main(void)
 	printf("#2\t%p\n", meow_lloc(63));
 	printf("#3\t%p\n", meow_lloc(10));
 	printf("#4\t%p\n", meow_lloc(500));
+	printf("#4\t%p\n", meow_lloc(500));
 
-	printf("#5\t%p\n", meow_lloc(4097));
 
-	printf("#6.1\t%p\n", meow_lloc(34256));
+	printf("#5\t%p\n", meow_lloc(7));
+
+	printf("#6.1\t%p\n", meow_lloc(3256));
 	printf("#6.2\t%p\n", meow_lloc(500));
 	printf("#6.3\t%p\n", meow_lloc(4));
 	printf("#6.4\t%p\n", meow_lloc(4));
-	printf("#7\t%p\n", meow_lloc(600000000000));
+	printf("#7\t%p\n", meow_lloc(600000000));
+	printf("#7.1\t%p\n", meow_lloc(32));
+	printf("#7.2\t%p\n", meow_lloc(119));
+	puts("We're alive");
 
 
 
