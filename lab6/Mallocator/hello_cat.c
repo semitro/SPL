@@ -19,7 +19,7 @@ void heap_init(size_t initial_size){
 	first = mmap(NULL, allocated,
 				 PROT_EXEC | PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
 #ifdef DEBUG
-	printf("heap init addr: %p\n", first);
+	printf("heap init addr: %p\n", (void*)first);
 	printf("heap init size: %lu\n", allocated);
 #endif
 	first->capacity = allocated - sizeof(struct mem);
@@ -35,17 +35,15 @@ void* meow_lloc(size_t size){
 	while(true){
 		if(i->is_free && i->capacity >= real_size){
 			// split it
-			reminder = (void*)i + real_size;
-			printf("\t\t\t%p\n", i);
+			reminder = (uint8_t*)i + real_size;
+//			printf("\t\t\t%p\n", (void*)i);
 
-			printf("\t\t\t%d\n", i->capacity);
+//			printf("\t\t\t%lu\n", i->capacity);
 
 			reminder->capacity = i->capacity - real_size;
 
-
-			printf("\t\t\t%d\n", reminder->capacity);
+//			printf("\t\t\t%lu\n", reminder->capacity);
 			i->capacity = size;
-
 
 			reminder->is_free = true;
 			i->is_free = false;
@@ -75,10 +73,10 @@ void* meow_lloc(size_t size){
 				 PROT_EXEC | PROT_READ | PROT_WRITE,
 				  MAP_PRIVATE | MAP_ANONYMOUS , -1, 0);
 
-	if(MAP_FAILED != (long int)new_chunk){
+	if(MAP_FAILED != (void*)new_chunk){
 		i->next = new_chunk;
 		new_chunk->next     = NULL;
-		new_chunk->is_free  = true;
+		new_chunk->is_free  = false;
 
 		new_chunk->capacity = allocated_mem - sizeof(struct mem);
 
@@ -95,3 +93,51 @@ void* meow_lloc(size_t size){
 	// if it is impossible, mmap anywhere
 	return NULL;
 }
+
+void merge_with_next_if_free(struct mem* m){
+	if(!m || !m->is_free || !m->next || !m->next->is_free
+			|| (uint8_t*)m + m->capacity + sizeof(struct mem) != m->next) // следует ли одик блок за другим в памяти
+		return;
+#ifdef DEBUG
+	printf("****\nСливаю блоки с адресами %p и %p\n****\n", (void*)m, (void*)m->next);
+#endif
+	m->capacity += m->next->capacity + sizeof(struct mem);
+	m->next = m->next->next;
+}
+
+void frrre(void *mem){
+	struct mem* i = first;
+	while(i){
+		// Если память есть в нашем индексе
+		if((uint8_t*)i + sizeof(struct mem) == mem){
+			i->is_free = true;
+			if(i->next != NULL)
+				merge_with_next_if_free(i);
+			return;
+		}
+		   i = i->next;
+	}
+}
+
+
+
+
+
+void memalloc_debug_struct_info(struct mem const* const address ) {
+
+	size_t i;
+	printf(	"start: %p\nsize: %lu\nis_free: %d\n",
+			(void*)address,
+			address-> capacity,
+			address-> is_free );
+	for ( i = 0;
+			i <  DEBUG_FIRST_BYTES  &&  i <  address-> capacity;
+			++i )
+		printf( "%hhX\n",
+				((char*)address)[ sizeof( struct mem ) + i ] );
+}
+void memalloc_debug_heap( struct mem const* ptr ) {
+	for( ; ptr; ptr = ptr->next )
+		memalloc_debug_struct_info( ptr );
+}
+
